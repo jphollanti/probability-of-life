@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Probability of Life</title>
+	<script data-main="equation.js" src="require-jquery.js"></script>
+	<script>
+    require.config({
+    	urlArgs: "bust=" + (new Date()).getTime()
+		});
+	</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<th># of galaxies: </th>
+			<td><input type="text" id="numberOfGalaxies" /></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<button id="equate">
+					Run equation
+				</button>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
