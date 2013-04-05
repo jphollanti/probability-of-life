@@ -1,11 +1,14 @@
 require(["jquery"], function($) {
   $(function() {
-	  $("#equate").click(function() {
+	  $(".constituent").change(function() {
 	  	equate();
 	  });
   });
 });
 
 function equate() {
-	alert("Number of Galaxies: " + $("#numberOfGalaxies").val());
+	$("#planetsInGalaxy").text(
+		($("#numberOfStars").val() * 1000000000)
+			* $("#ratioOfSolarSystemsWithPlanets").val()
+			* $("#ratioOfThirdGenerationStarSystems").val());
 }
