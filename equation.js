@@ -7,8 +7,79 @@ require(["jquery"], function($) {
 });
 
 function equate() {
+  /**
+   */
 	$("#planetsInGalaxy").text(
-		($("#numberOfStars").val() * 1000000000)
-			* $("#ratioOfSolarSystemsWithPlanets").val()
-			* $("#ratioOfThirdGenerationStarSystems").val());
+			($("#numberOfStars").val() * 1000000000)
+		* $("#averageNumberOfPlanetsInASolarSystem").val()
+		* toRatio($("#ratioOfSolarSystemsWithPlanets").val())
+		* toRatio($("#ratioOfThirdGenerationStarSystems").val())
+		);
+	
+	/**
+	 */
+	$("#planetsCapableOfSupportingLife").text(
+			$("#planetsInGalaxy").text()
+		* toRatio($("#ratioOfPlanetsInHabitableZone").val())
+		* toRatio($("#ratioOfPlanetsWithWater").val())
+		* toRatio($("#ratioOfSystemsWithGuardianPlanet").val())
+		* toRatio($("#ratioOfPlanetsWithAnIronCore").val())
+		* toRatio($("#ratioOfPlanetsWithSufficientMass").val())
+		* toRatio($("#ratioOfPlanetsWithChemicalPrerequisitesForSupportingLife").val())
+		);
+	
+	/**
+	 */
+	var thirdGenStart = $("#ageOf3rdGenerationStarSystems").val();
+	var timeWindowStart = 
+					$("#ageOf3rdGenerationStarSystems").val()
+				- $("#timeForLifeToAppearAfterPlanetIsBorn").val();
+	var timeWindowEnd = $("#timeForLifeToAppearAfterPlanetIsBorn").val();
+	
+	var timeToIntelligentLife = $("#timeAfterPrimitiveLifeEvolvesIntoIntelligentLife").val();
+	var timeToSivilization = $("#timeForIntelligentLifeToEvolveIntoASivilization").val();
+	
+	var planetsCapableOfSupportingLife = $("#planetsCapableOfSupportingLife").text();
+	
+	$("#timeWindowForLife").text(
+		timeWindowStart
+		+ " - " +
+		timeWindowEnd		
+		);
+	
+	$("#amountOfLife").text(
+			((timeWindowStart - timeWindowEnd) / thirdGenStart)
+		* planetsCapableOfSupportingLife
+		);
+	
+	$("#amountOfIntelligentLife").text(
+			((timeWindowStart - timeWindowEnd - timeToIntelligentLife) / thirdGenStart)
+		* planetsCapableOfSupportingLife
+		);
+	
+	
+	$("#avgAmountOfSivilizations").text(
+			(
+				(timeWindowStart - timeWindowEnd - timeToIntelligentLife - timeToSivilization) 
+				/ thirdGenStart
+			)
+		* planetsCapableOfSupportingLife
+		);
+	
+	
+	$("#timeInYearsWhenSivilizationsHaveEvolved").text(
+		(thirdGenStart - timeWindowEnd - timeWindowEnd - timeToIntelligentLife - timeToSivilization) * 1000000000
+		);
+	
+	$("#newCivilizationEvolvesEvery").text(
+		$("#timeInYearsWhenSivilizationsHaveEvolved").text() / $("#avgAmountOfSivilizations").text()
+		);
+	
+	$("#amountOfSivilizationsInTheGalaxy").text(
+		$("#howLongDoSivilizationsSurvive").val() / $("#newCivilizationEvolvesEvery").text()
+		);
+}
+
+function toRatio(percentage) {
+	return percentage / 100;
 }
