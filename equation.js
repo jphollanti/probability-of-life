@@ -1,10 +1,31 @@
 require(["jquery"], function($) {
   $(function() {
 	  $(".constituent").change(function() {
-	  	equate();
+	  	if (verify(this)) {
+	  		equate();
+	  	}
 	  });
   });
 });
+
+function verify(element) {
+	// http://stackoverflow.com/questions/1318076/jquery-hasattr-checking-to-see-if-there-is-an-attribute-on-an-element
+	var range = $(element).attr("data-range");
+	if (typeof range === 'undefined' && range === false) {
+    return true;
+	}
+
+	var ranges = range.split("-");
+	var low = parseInt(ranges[0]);
+	var high = parseInt(ranges[1]);
+	var value = parseInt($(element).val());
+	if (value < low || value > high) {
+		$(element).css("background-color", "#f00");
+		return false;
+	}
+	$(element).css("background-color", "#fff");
+	return true;
+}
 
 function equate() {
   /**
