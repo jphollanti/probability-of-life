@@ -6,6 +6,7 @@ require(["jquery"], function($) {
 	  	}
 	  });
   });
+  equate();
 });
 
 function verify(element) {
