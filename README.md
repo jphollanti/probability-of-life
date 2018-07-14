@@ -2,3 +2,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Intro to redux: https://github.com/Microsoft/TypeScript-React-Starter
 
+# Dev
+##Run dev server with:
+
+    npm start
