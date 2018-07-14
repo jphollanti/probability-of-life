@@ -17,6 +17,8 @@
     ],
     "object-literal-sort-keys": false,
     "comment-format": [false],
-    "jsx-no-lambda": false
+    "jsx-no-lambda": false,
+    "member-ordering": false,
+    "no-console": false
   }
 }
