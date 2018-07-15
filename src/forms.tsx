@@ -3,9 +3,6 @@ import * as React from 'react';
 export class Question extends React.Component<any, any> {
     constructor(props:any) {
         super(props)
-
-        console.log('current value',this.props.currentValue)
-
         this.state = { 
             question: this.props.question,
             min: this.props.min,
@@ -16,7 +13,7 @@ export class Question extends React.Component<any, any> {
         }
     }
 
-    private handleChange(e: React.FormEvent<HTMLInputElement>) {
+    public handleChange(e: React.FormEvent<HTMLInputElement>) {
         this.state.onChange(e.currentTarget.value)
     }
 
@@ -27,7 +24,7 @@ export class Question extends React.Component<any, any> {
                     { this.state.question }
                 </div>
                 <div className="answer">
-                    between { this.state.min } - { this.state.min }
+                    between { this.state.min } - { this.state.max }
                     <input type="text" className="answer"  onChange={(e) => this.handleChange(e) } />
                     current value: { this.state.currentValue }
                 </div>
