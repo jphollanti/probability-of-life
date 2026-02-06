@@ -196,7 +196,7 @@
 
 <div class="app">
   <header>
-    <h1>Probability of Life</h1>
+    <h1>Life Calculator</h1>
     <p class="subtitle">Estimating civilizations in the Milky Way</p>
     <p class="intro">
       How many civilizations currently exist in the Milky Way? This calculator
