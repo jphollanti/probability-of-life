@@ -1,4 +1,5 @@
 <script>
+  import { untrack } from 'svelte';
   import { formatNumber } from './formatNumber.js';
 
   let {
@@ -118,6 +119,8 @@
       z: 0,
       label: 'Our Sun',
       isSun: true,
+      twinkleOffset: Math.random() * Math.PI * 2,
+      twinkleSpeed: 0.8 + Math.random() * 1.5,
     };
     civilizationStars.push(sunStar);
 
@@ -135,6 +138,8 @@
         z: 0,
         label: i < 5 ? `Civilization ${i + 2}` : null,
         isSun: false,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.8 + Math.random() * 1.5,
       });
     }
   }
@@ -153,7 +158,8 @@
 
   // Re-place civilizations reactively
   $effect(() => {
-    placeCivilizations(currentCivilizations);
+    const count = currentCivilizations;
+    untrack(() => placeCivilizations(count));
   });
 
   // Animation loop
