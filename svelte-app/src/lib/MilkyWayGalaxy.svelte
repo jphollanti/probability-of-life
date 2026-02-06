@@ -30,8 +30,8 @@
   let bgH = 0;
 
   function createCivSprite(isSun) {
-    const glowRadius = isSun ? 12 : 9;
-    const coreSize = isSun ? 2.5 : 2.2;
+    const glowRadius = isSun ? 6 : 5;
+    const coreSize = isSun ? 1.5 : 1.2;
     const dim = Math.ceil((glowRadius + 2) * 2);
     const c = document.createElement('canvas');
     c.width = dim;
@@ -174,7 +174,7 @@
     sunStar = {
       r: sunR,
       angle: sunAngle,
-      size: 2.5,
+      size: 1.5,
       brightness: 1.0,
       orbitalSpeed: BASE_ROTATION_SPEED * (1 + 1.5 / (sunR + 0.3)),
       z: 0,
@@ -184,14 +184,18 @@
     };
     civilizationStars.push(sunStar);
 
-    const otherCount = Math.min(civCount - 1, 20);
+    // Scale civilization dots: 1:1 up to 50, then logarithmic growth capped at 100
+    const others = civCount - 1;
+    const otherCount = others <= 50
+      ? others
+      : Math.min(100, Math.round(50 + 20 * Math.log10(others / 50)));
     for (let i = 0; i < otherCount; i++) {
       const r = 0.25 + Math.random() * 0.55;
       const angle = Math.random() * Math.PI * 2;
       civilizationStars.push({
         r,
         angle,
-        size: 2.2,
+        size: 1.2,
         brightness: 1.0,
         orbitalSpeed: BASE_ROTATION_SPEED * (1 + 1.5 / (r + 0.3)),
         z: 0,
@@ -206,6 +210,7 @@
     numberOfStars > 0 ? (numberOfStars * 1e9) / TOTAL_STARS : 1
   );
   let civCountDisplay = $derived(Math.round(currentCivilizations));
+  let displayedCivDots = $derived(civilizationStars.length);
 
   generateStars();
   initSprites();
@@ -365,8 +370,8 @@
     {/if}
     <div class="legend-note">
       Each dot represents ~{formatNumber(scaleRatio)} stars.
-      {#if civCountDisplay > 20}
-        Showing 20 of {formatNumber(civCountDisplay)} civilizations.
+      {#if civCountDisplay > 0 && displayedCivDots < civCountDisplay}
+        Showing {displayedCivDots} of {formatNumber(civCountDisplay)} civilizations.
       {/if}
     </div>
   </div>
