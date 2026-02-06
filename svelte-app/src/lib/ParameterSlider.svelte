@@ -7,7 +7,10 @@
     unit = '',
     label = '',
     logScale = false,
+    info = '',
   } = $props();
+
+  let showInfo = $state(false);
 
   let sMin = $derived(logScale ? Math.log10(Math.max(min, 1)) : min);
   let sMax = $derived(logScale ? Math.log10(max) : max);
@@ -34,10 +37,24 @@
       value = v;
     }
   }
+
+  function toggleInfo() {
+    showInfo = !showInfo;
+  }
 </script>
 
 <div class="parameter" class:invalid={!isValid}>
-  <p class="label">{label}</p>
+  <div class="label-row">
+    <p class="label">{label}</p>
+    {#if info}
+      <button class="info-btn" class:active={showInfo} onclick={toggleInfo} title="Learn more">i</button>
+    {/if}
+  </div>
+  {#if info && showInfo}
+    <div class="info-panel">
+      {@html info}
+    </div>
+  {/if}
   <div class="controls">
     <input
       type="range"
@@ -71,11 +88,81 @@
     margin-bottom: 1.25rem;
   }
 
+  .label-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
   .label {
-    margin: 0 0 0.4rem 0;
+    margin: 0;
     font-size: 0.9rem;
     line-height: 1.4;
     color: #ccc;
+    flex: 1;
+  }
+
+  .info-btn {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(74, 158, 255, 0.4);
+    background: rgba(74, 158, 255, 0.1);
+    color: #4a9eff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
+    margin-top: 0.1rem;
+  }
+
+  .info-btn:hover {
+    background: rgba(74, 158, 255, 0.25);
+    border-color: #4a9eff;
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
+  }
+
+  .info-btn.active {
+    background: rgba(74, 158, 255, 0.3);
+    border-color: #4a9eff;
+    color: #fff;
+  }
+
+  .info-panel {
+    margin: 0 0 0.6rem 0;
+    padding: 0.7rem 0.9rem;
+    background: rgba(74, 158, 255, 0.06);
+    border-left: 2px solid rgba(74, 158, 255, 0.3);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #aab;
+  }
+
+  .info-panel :global(a) {
+    color: #6db3f8;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(109, 179, 248, 0.3);
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .info-panel :global(a:hover) {
+    color: #9dcbff;
+    border-bottom-color: #9dcbff;
+  }
+
+  .info-panel :global(strong) {
+    color: #ccd;
+    font-weight: 600;
   }
 
   .controls {

@@ -26,19 +26,16 @@
 
   const MODELS = {
     gaussian: {
-      label: 'Normaalijakauma (Gaussin käyrä)',
-      sublabel: 'Gaussian / Normal distribution',
-      description: 'Klassinen kellokäyrä: useimmat sivilisaatiot selviävät lähellä keskiarvoa.',
+      label: 'Normal distribution (Gaussian)',
+      description: 'Classic bell curve: most civilizations survive close to the mean lifespan.',
     },
     lognormal: {
-      label: 'Lognormaalijakauma (Maccone)',
-      sublabel: 'Lognormal distribution (Maccone 2010)',
-      description: 'Epäsymmetrinen: suurin osa kuolee nuorena, harva elää hyvin pitkään. Perustuu Macconen tilastolliseen Draken yhtälöön.',
+      label: 'Lognormal distribution (Maccone 2010)',
+      description: 'Asymmetric: most civilizations die young, but a few survive for a very long time. Based on Maccone\'s statistical Drake equation.',
     },
     exponential: {
-      label: 'Eksponenttijakauma (Tuomiopäivä)',
-      sublabel: 'Exponential decay (Doomsday model)',
-      description: 'Vakio tuhoutumistodennäköisyys: nuorena kuoleminen on todennäköisintä. Pessimistisin malli.',
+      label: 'Exponential decay (Doomsday model)',
+      description: 'Constant probability of destruction: dying young is most likely. The most pessimistic model.',
     },
   };
 
@@ -137,8 +134,8 @@
   // --- X-axis ticks ---
 
   function formatAxisValue(val) {
-    if (val >= 1e9) return (val / 1e9).toFixed(1) + ' mrd';
-    if (val >= 1e6) return (val / 1e6).toFixed(1) + ' milj.';
+    if (val >= 1e9) return (val / 1e9).toFixed(1) + 'B';
+    if (val >= 1e6) return (val / 1e6).toFixed(1) + 'M';
     if (val >= 1e3) return (val / 1e3).toFixed(0) + 'k';
     return val.toFixed(0);
   }
@@ -158,7 +155,7 @@
 
 <div class="curve-container">
   <div class="model-selector">
-    <label class="selector-label" for="model-select">Jakauman malli / Distribution model</label>
+    <label class="selector-label" for="model-select">Distribution model</label>
     <select id="model-select" bind:value={model}>
       {#each Object.entries(MODELS) as [key, m]}
         <option value={key}>{m.label}</option>
@@ -168,7 +165,6 @@
 
   <p class="model-description">
     {currentModel.description}
-    <span class="model-sublabel">{currentModel.sublabel}</span>
   </p>
 
   <svg viewBox="0 0 {WIDTH} {HEIGHT}" class="chart">
@@ -222,7 +218,7 @@
         font-size="11"
         font-weight="600"
       >
-        {model === 'lognormal' ? 'mediaani' : 'keskiarvo'} ({formatAxisValue(meanSurvival)})
+        {model === 'lognormal' ? 'median' : 'mean'} ({formatAxisValue(meanSurvival)})
       </text>
     {/if}
 
@@ -261,7 +257,7 @@
       fill="#888"
       font-size="11"
     >
-      Sivilisaation ikä (vuosia)
+      Civilization age (years)
     </text>
 
     <!-- Y axis label -->
@@ -273,7 +269,7 @@
       font-size="11"
       transform="rotate(-90, 12, {PADDING.top + PLOT_H / 2})"
     >
-      Todennäköisyys
+      Probability
     </text>
   </svg>
 </div>
@@ -329,14 +325,6 @@
     color: var(--text-muted, #888);
     margin-bottom: 0.75rem;
     line-height: 1.5;
-  }
-
-  .model-sublabel {
-    display: block;
-    font-style: italic;
-    font-size: 0.78rem;
-    color: #666;
-    margin-top: 0.15rem;
   }
 
   .chart {
