@@ -184,11 +184,15 @@
     };
     civilizationStars.push(sunStar);
 
-    // Scale civilization dots: 1:1 up to 50, then logarithmic growth capped at 100
+    // Scale green dots proportionally to the galaxy, same as regular stars.
+    // Each regular dot represents (numberOfStars * 1e9 / TOTAL_STARS) real stars,
+    // so green dots = civs / that same ratio. For small counts we still show
+    // at least 1 dot per civilization (up to 50) so they remain visible.
     const others = civCount - 1;
-    const otherCount = others <= 50
-      ? others
-      : Math.min(100, Math.round(50 + 20 * Math.log10(others / 50)));
+    const proportional = numberOfStars > 0
+      ? Math.round(others * TOTAL_STARS / (numberOfStars * 1e9))
+      : others;
+    const otherCount = Math.min(TOTAL_STARS, Math.max(Math.min(others, 50), proportional));
     for (let i = 0; i < otherCount; i++) {
       const r = 0.25 + Math.random() * 0.55;
       const angle = Math.random() * Math.PI * 2;
