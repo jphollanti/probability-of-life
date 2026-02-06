@@ -301,8 +301,12 @@
       ctx.globalAlpha = 1;
 
       // --- Draw civilization stars using pre-rendered sprites ---
+      // Scale down sprites when many are displayed so they don't overwhelm
+      const civLen = civilizationStars.length;
+      const civScale = civLen <= 50 ? 1.0 : Math.max(0.35, 50 / civLen);
+
       let sunX = 0, sunY = 0, hasSun = false;
-      for (let i = 0; i < civilizationStars.length; i++) {
+      for (let i = 0; i < civLen; i++) {
         const civ = civilizationStars[i];
         const ca = civ.angle + time * civ.orbitalSpeed;
         const x = cx + Math.cos(ca) * civ.r * w045;
@@ -310,9 +314,12 @@
 
         const twinkle = 0.7 + 0.3 * Math.sin(time * civ.twinkleSpeed + civ.twinkleOffset);
         const sprite = civ.isSun ? civSunSprite : civOtherSprite;
+        const s = civ.isSun ? Math.max(civScale, 0.6) : civScale;
+        const dim = sprite.half * 2 * s;
+        const off = dim / 2;
 
         ctx.globalAlpha = twinkle;
-        ctx.drawImage(sprite.canvas, x - sprite.half, y - sprite.half);
+        ctx.drawImage(sprite.canvas, x - off, y - off, dim, dim);
 
         if (civ.isSun) {
           sunX = x;
