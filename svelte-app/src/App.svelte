@@ -196,169 +196,186 @@
 
 <div class="app">
   <header>
-    <h1>Elämän todennäköisyys</h1>
-    <p class="subtitle">Probability of Life in the Milky Way</p>
+    <h1>Life Calculator</h1>
+    <p class="subtitle">Estimating civilizations in the Milky Way</p>
     <p class="intro">
-      Kuinka monta sivilisaatiota Linnunradassa on tällä hetkellä? Tämä laskuri
-      perustuu <em>Draken yhtälöön</em> ja sen laajennuksiin. Säädä parametreja
-      ja katso, miten ne vaikuttavat lopputulokseen.
+      How many civilizations currently exist in the Milky Way? This calculator
+      is based on the <em>Drake Equation</em> and its extensions. Adjust the parameters
+      and see how they affect the outcome.
     </p>
 
     <div class="hero-civilization" bind:this={heroEl}>
-      <span class="hero-label">Sivilisaatioita Linnunradassa tällä hetkellä</span>
+      <span class="hero-label">Civilizations in the Milky Way right now</span>
       <span class="hero-value">{formatNumber(currentCivilizations, 1)}</span>
     </div>
   </header>
 
   <div class="floating-header" class:visible={showFloatingHeader}>
-    <span class="floating-label">Sivilisaatioita nyt</span>
+    <span class="floating-label">Civilizations now</span>
     <span class="floating-value">{formatNumber(currentCivilizations, 1)}</span>
   </div>
 
   <main>
     <!-- Section 1: Stars and Planets -->
     <section class="card">
-      <h2>Tähtikunnat, planeetat ja kuut</h2>
-      <p class="section-subtitle">Stars, planets and moons</p>
+      <h2>Stars, Planets and Moons</h2>
+      <p class="section-subtitle">Stellar and planetary parameters</p>
 
       <ParameterSlider
         bind:value={numberOfStars}
         min={1} max={1000} step={1}
-        unit="miljardia"
-        label="Linnunradalla arvioidaan olevan 100–400 miljardia tähteä. Mikä on sinun arviosi?"
+        unit="billion"
+        label="The Milky Way is estimated to contain 100–400 billion stars. What is your estimate?"
+        info={'The <a href="https://en.wikipedia.org/wiki/Milky_Way" target="_blank" rel="noopener">Milky Way</a> is a barred spiral galaxy with an estimated diameter of 100,000 light-years. Estimates of its total star count range from 100 to 400 billion, with most modern surveys suggesting around 200–400 billion. The number depends on how many faint <a href="https://en.wikipedia.org/wiki/Red_dwarf" target="_blank" rel="noopener">red dwarf</a> stars are included, which make up roughly 70% of all stars.'}
       />
 
       <ParameterSlider
         bind:value={ratioWithPlanets}
         min={1} max={100} step={1}
         unit="%"
-        label="Monellako tähtikunnalla on planeettoja keskimäärin?"
+        label="What percentage of stars have planets on average?"
+        info={'Data from the <a href="https://en.wikipedia.org/wiki/Kepler_space_telescope" target="_blank" rel="noopener">Kepler space telescope</a> suggests that virtually every star in the galaxy has at least one planet. Studies indicate that <strong>planets are the rule rather than the exception</strong>. Current estimates suggest at least 80–100% of stars host planetary systems. See <a href="https://en.wikipedia.org/wiki/Exoplanet" target="_blank" rel="noopener">Exoplanet</a> for more.'}
       />
 
       <ParameterSlider
         bind:value={planetsPerStar}
         min={1} max={20} step={1}
-        unit="kpl"
-        label="Montako planeettaa ja planeetan kaltaista kuuta on keskimäärin tähdellä, jolla planeettoja ylipäätään on? (Aurinkokunnassa on 8 planeettaa. Jupiterilla ja Saturnuksella on muutamia planeetan tapaisia kuita.)"
+        unit="pcs"
+        label="How many planets and planet-like moons does a star with planets have on average? (Our Solar System has 8 planets. Jupiter and Saturn have several planet-like moons.)"
+        info={'Our <a href="https://en.wikipedia.org/wiki/Solar_System" target="_blank" rel="noopener">Solar System</a> has 8 planets, but moons like <a href="https://en.wikipedia.org/wiki/Europa_(moon)" target="_blank" rel="noopener">Europa</a>, <a href="https://en.wikipedia.org/wiki/Enceladus" target="_blank" rel="noopener">Enceladus</a>, and <a href="https://en.wikipedia.org/wiki/Titan_(moon)" target="_blank" rel="noopener">Titan</a> are also considered potentially habitable. Kepler data suggests an average of roughly <strong>1.6 planets per star</strong> for Sun-like stars, but including moons and smaller bodies increases this significantly.'}
       />
 
       <ParameterSlider
         bind:value={ratioThirdGen}
         min={1} max={100} step={1}
         unit="%"
-        label="Montako prosenttia kaikista tähtikunnista on kolmannen sukupolven tähtikuntia? Aurinkokunta on kolmannen sukupolven tähtikunta, ja sitä pidetään elämän edellytyksenä."
+        label="What percentage of all star systems are third-generation? Our Solar System is a third-generation star system, which is considered a prerequisite for life."
+        info={'Stars are classified into <a href="https://en.wikipedia.org/wiki/Stellar_population" target="_blank" rel="noopener">stellar populations</a>. <strong>Population I</strong> (third-generation) stars are metal-rich, meaning they contain heavy elements forged in earlier generations of supernovae. These heavy elements (carbon, oxygen, iron, silicon) are essential for forming rocky planets and the chemistry of life. Our Sun is a Population I star. Earlier generations lacked sufficient heavy elements for complex chemistry.'}
       />
 
       <div class="section-result">
-        Linnunradallasi on <strong>{formatNumber(planetsInGalaxy)}</strong> planeettaa kolmannen sukupolven tähtikunnissa.
+        Your Milky Way has <strong>{formatNumber(planetsInGalaxy)}</strong> planets in third-generation star systems.
       </div>
     </section>
 
     <!-- Section 2: Life-supporting Conditions -->
     <section class="card">
-      <h2>Elämää ylläpitävät olosuhteet</h2>
-      <p class="section-subtitle">Life-supporting conditions</p>
+      <h2>Life-Supporting Conditions</h2>
+      <p class="section-subtitle">Factors required for life to emerge</p>
 
       <ParameterSlider
         bind:value={ratioHabitableZone}
         min={1} max={100} step={1}
         unit="%"
-        label="Elämälle sopiva vyöhyke on optimaalinen etäisyys keskustähdestä, missä ei ole liian kuumaa tai kylmää. Aurinkokunnassa tällaiselle vyöhykkeelle kuuluvat Maa ja Mars. Moniko planeetta kuuluu keskimäärin tällaiselle vyöhykkeelle?"
+        label="The habitable zone is the optimal distance from a star where it is neither too hot nor too cold. In our Solar System, Earth and Mars fall within this zone. What fraction of planets are in the habitable zone?"
+        info={'The <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank" rel="noopener">circumstellar habitable zone</a> (also called the "Goldilocks zone") is the range of orbits around a star where liquid water could exist on a planet\'s surface. The width of this zone depends on the star\'s luminosity and type. For Sun-like stars, it extends roughly from 0.95 to 1.67 AU. Red dwarfs have much narrower habitable zones, while more luminous stars have wider ones.'}
       />
 
       <ParameterSlider
         bind:value={ratioWithWater}
         min={1} max={100} step={1}
         unit="%"
-        label="Tuntemamme elämän edellytys on vesi. Monellako elinkelpoisella planeetalla on riittävästi vettä elämän ylläpitämiseksi?"
+        label="Water is a prerequisite for life as we know it. What fraction of habitable planets have enough water to sustain life?"
+        info={'<a href="https://en.wikipedia.org/wiki/Water" target="_blank" rel="noopener">Water</a> is considered essential because it is an excellent solvent, remains liquid over a wide temperature range, and facilitates complex chemistry. Water is actually quite common in the universe — it has been detected on <a href="https://en.wikipedia.org/wiki/Extraterrestrial_liquid_water" target="_blank" rel="noopener">Mars, Europa, Enceladus</a>, and in many exoplanet atmospheres. The key question is whether enough liquid surface water exists for sustained biochemistry.'}
       />
 
       <ParameterSlider
         bind:value={ratioGuardianPlanet}
         min={1} max={100} step={1}
         unit="%"
-        label="Jupiterin kaltainen suuri planeetta imuroi meteoriitteja ja suojelee sisempiä planeettoja. Monellako tähtijärjestelmällä on tällainen suojelijaplaneetta?"
+        label="A large planet like Jupiter sweeps up meteorites and protects inner planets. What fraction of star systems have such a guardian planet?"
+        info={'The <a href="https://en.wikipedia.org/wiki/Jupiter" target="_blank" rel="noopener">Jupiter</a> shield hypothesis suggests that gas giants protect inner rocky planets by gravitationally deflecting or capturing incoming comets and asteroids, reducing the frequency of catastrophic impacts. While some studies challenge this idea (Jupiter may also <em>redirect</em> objects inward), the presence of a massive outer planet is generally thought to moderate the bombardment rate, giving life more time to evolve. See <a href="https://en.wikipedia.org/wiki/Rare_Earth_hypothesis" target="_blank" rel="noopener">Rare Earth hypothesis</a>.'}
       />
 
       <ParameterSlider
         bind:value={ratioIronCore}
         min={1} max={100} step={1}
         unit="%"
-        label="Metalliydin ja sen aiheuttama magneettikenttä suojaa avaruuden säteilyltä. Monellako planeetalla on metalliydin? (Raskaat metallit ovat yleisiä kolmannen sukupolven tähtikunnissa.)"
+        label="A metallic core and the magnetic field it generates protect against space radiation. What fraction of planets have a metallic core? (Heavy metals are common in third-generation star systems.)"
+        info={'A planet\'s <a href="https://en.wikipedia.org/wiki/Planetary_core" target="_blank" rel="noopener">metallic core</a> generates a <a href="https://en.wikipedia.org/wiki/Magnetosphere" target="_blank" rel="noopener">magnetosphere</a> through the dynamo effect. This magnetic field shields the surface from harmful <a href="https://en.wikipedia.org/wiki/Solar_wind" target="_blank" rel="noopener">solar wind</a> and <a href="https://en.wikipedia.org/wiki/Cosmic_ray" target="_blank" rel="noopener">cosmic radiation</a>, and prevents the atmosphere from being stripped away. Mars, for example, lost most of its atmosphere after its core cooled and its magnetic field collapsed. Earth\'s iron-nickel core remains active, maintaining our protective magnetosphere.'}
       />
 
       <ParameterSlider
         bind:value={ratioSufficientMass}
         min={1} max={100} step={1}
         unit="%"
-        label="Riittävä painovoima on edellytys kaasukehän säilymiselle. Monellako planeetalla on riittävästi massaa ylläpitää kaasukehä?"
+        label="Sufficient gravity is required to retain an atmosphere. What fraction of planets have enough mass to maintain an atmosphere?"
+        info={'A planet needs sufficient <a href="https://en.wikipedia.org/wiki/Surface_gravity" target="_blank" rel="noopener">surface gravity</a> to prevent <a href="https://en.wikipedia.org/wiki/Atmospheric_escape" target="_blank" rel="noopener">atmospheric escape</a>. Lighter gas molecules (hydrogen, helium) escape more easily, so a planet must be massive enough to hold onto heavier gases like nitrogen and oxygen. Earth\'s mass (~5.97 × 10²⁴ kg) is sufficient, while Mars (about 10% of Earth\'s mass) has lost most of its atmosphere. <a href="https://en.wikipedia.org/wiki/Super-Earth" target="_blank" rel="noopener">Super-Earths</a> retain atmospheres even more effectively.'}
       />
 
       <ParameterSlider
         bind:value={ratioChemicalPrerequisites}
         min={1} max={100} step={1}
         unit="%"
-        label="Onko olemassa kemiallinen edellytys, kuten tietty seos ('alkuliemi'), jotta elämä voi saada alkunsa? Arvioi, monellako muuten elinkelpoisella planeetalla tällainen edellytys täyttyy."
+        label="Is there a chemical prerequisite, such as a specific mixture ('primordial soup'), for life to begin? Estimate what fraction of otherwise habitable planets meet this requirement."
+        info={'The <a href="https://en.wikipedia.org/wiki/Primordial_soup" target="_blank" rel="noopener">primordial soup</a> hypothesis proposes that life arose from a mixture of organic molecules in early Earth\'s oceans, energized by lightning, UV radiation, or hydrothermal vents. The famous <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Urey_experiment" target="_blank" rel="noopener">Miller–Urey experiment</a> (1952) demonstrated that amino acids can form spontaneously under early Earth-like conditions. Other theories include the <a href="https://en.wikipedia.org/wiki/RNA_world" target="_blank" rel="noopener">RNA world hypothesis</a> and <a href="https://en.wikipedia.org/wiki/Hydrothermal_vent#Origin_of_life" target="_blank" rel="noopener">deep-sea hydrothermal vent</a> origins.'}
       />
 
       <ParameterSlider
         bind:value={ratioLifeBegins}
         min={1} max={100} step={1}
         unit="%"
-        label="Vaikka kaikki edellytykset olisivat kohdallaan, millä todennäköisyydellä elämä todella käynnistyy? Tämä kuvaa siirtymää kemiasta biologiaan — kuinka harvinainen tapahtuma se on?"
+        label="Even if all prerequisites are met, what is the probability that life actually begins? This represents the transition from chemistry to biology — how rare is that event?"
+        info={'<a href="https://en.wikipedia.org/wiki/Abiogenesis" target="_blank" rel="noopener">Abiogenesis</a> — the natural process of life arising from non-living matter — remains one of the deepest unsolved problems in science. We know it happened at least once (on Earth, within the first billion years), but we don\'t know if it was an extraordinarily unlikely event or a near-certainty given the right conditions. The speed with which life appeared on Earth (within ~500 million years of habitable conditions) suggests it may not be exceedingly rare.'}
       />
 
       <div class="section-result">
-        Linnunradallasi on <strong>{formatNumber(planetsCapableOfLife)}</strong> planeettaa, joilla elämä voi syntyä.
+        Your Milky Way has <strong>{formatNumber(planetsCapableOfLife)}</strong> planets where life can emerge.
       </div>
     </section>
 
     <!-- Section 3: Time, Intelligence and Civilizations -->
     <section class="card">
-      <h2>Aika, älyllinen elämä ja sivilisaatiot</h2>
-      <p class="section-subtitle">Time, intelligent life and civilizations</p>
+      <h2>Time, Intelligent Life and Civilizations</h2>
+      <p class="section-subtitle">Temporal and sociological factors</p>
 
       <ParameterSlider
         bind:value={ageThirdGen}
         min={0.5} max={13} step={0.1}
-        unit="mrd v"
-        label="Kuinka vanhoja kolmannen sukupolven tähtikunnat ovat enintään? (Linnunrata on noin 13 miljardia vuotta vanha.)"
+        unit="bn yr"
+        label="What is the maximum age of third-generation star systems? (The Milky Way is about 13 billion years old.)"
+        info={'The <a href="https://en.wikipedia.org/wiki/Age_of_the_universe" target="_blank" rel="noopener">universe is about 13.8 billion years old</a>. Third-generation (Population I) stars like our Sun began forming roughly 8–10 billion years ago, after earlier stellar generations had enriched the interstellar medium with heavy elements through <a href="https://en.wikipedia.org/wiki/Supernova" target="_blank" rel="noopener">supernovae</a>. Our Sun itself is about <a href="https://en.wikipedia.org/wiki/Sun" target="_blank" rel="noopener">4.6 billion years old</a>, meaning some third-generation systems could be billions of years older than ours.'}
       />
 
       <ParameterSlider
         bind:value={timeForLifeToAppear}
         min={0.1} max={13} step={0.1}
-        unit="mrd v"
-        label="Kuinka kauan kestää elämän ilmaantuminen planeetan synnystä? (Maassa muutamia miljardeja vuosia.)"
+        unit="bn yr"
+        label="How long does it take for life to appear after a planet forms? (On Earth, a few billion years.)"
+        info={'On Earth, the <a href="https://en.wikipedia.org/wiki/Earliest_known_life_forms" target="_blank" rel="noopener">earliest evidence of life</a> dates to about 3.5–4.1 billion years ago, roughly 500 million to 1 billion years after the planet formed. This includes <a href="https://en.wikipedia.org/wiki/Stromatolite" target="_blank" rel="noopener">stromatolites</a> and chemical signatures in ancient rocks. The relatively rapid emergence of life on Earth suggests that abiogenesis may occur fairly quickly once conditions are suitable.'}
       />
 
       <ParameterSlider
         bind:value={timeToIntelligentLife}
         min={0.1} max={13} step={0.1}
-        unit="mrd v"
-        label="Kuinka kauan alkeellisesta elämästä menee älykkään elämän syntyyn? (Maassa yksisoluisista kädellisiin.)"
+        unit="bn yr"
+        label="How long does it take from primitive life to intelligent life? (On Earth, from single-celled organisms to primates.)"
+        info={'On Earth, the journey from the <a href="https://en.wikipedia.org/wiki/Prokaryote" target="_blank" rel="noopener">first single-celled organisms</a> (~3.8 billion years ago) to <a href="https://en.wikipedia.org/wiki/Evolution_of_human_intelligence" target="_blank" rel="noopener">intelligent primates</a> took roughly 3.5 billion years. Key milestones include the <a href="https://en.wikipedia.org/wiki/Eukaryote" target="_blank" rel="noopener">evolution of eukaryotes</a> (~2 bya), <a href="https://en.wikipedia.org/wiki/Multicellular_organism" target="_blank" rel="noopener">multicellular life</a> (~600 mya), and the <a href="https://en.wikipedia.org/wiki/Cambrian_explosion" target="_blank" rel="noopener">Cambrian explosion</a> (~540 mya). Whether intelligence is an inevitable outcome of evolution or a rare accident is debated.'}
       />
 
       <ParameterSlider
         bind:value={timeToCivilization}
         min={0.01} max={5} step={0.01}
-        unit="mrd v"
-        label="Kuinka kauan älyllisellä elämällä menee kehittyä sivilisaatioksi?"
+        unit="bn yr"
+        label="How long does it take intelligent life to develop into a civilization?"
+        info={'On Earth, <a href="https://en.wikipedia.org/wiki/Homo_sapiens" target="_blank" rel="noopener"><em>Homo sapiens</em></a> appeared about 300,000 years ago, but <a href="https://en.wikipedia.org/wiki/Civilization" target="_blank" rel="noopener">civilization</a> (agriculture, writing, cities) only emerged about 10,000 years ago. Radio technology — making us detectable from space — was invented just over 100 years ago. The transition from intelligence to technological civilization is remarkably brief on cosmic timescales (~0.0003 billion years on Earth).'}
       />
 
       <ParameterSlider
         bind:value={ratioCommunication}
         min={1} max={100} step={1}
         unit="%"
-        label="Moniko sivilisaatio kehittää havaittavaa teknologiaa (radio, laser, jne.)? Kaikki sivilisaatiot eivät välttämättä lähetä signaaleja avaruuteen."
+        label="What fraction of civilizations develop detectable technology (radio, laser, etc.)? Not all civilizations necessarily broadcast signals into space."
+        info={'This parameter relates to <a href="https://en.wikipedia.org/wiki/Technosignature" target="_blank" rel="noopener">technosignatures</a> — detectable signs of technology. Earth has been emitting radio waves for about a century, creating an expanding <a href="https://en.wikipedia.org/wiki/Radio_wave" target="_blank" rel="noopener">radio bubble</a> roughly 200 light-years in diameter. However, civilizations might choose not to broadcast (the "<a href="https://en.wikipedia.org/wiki/Dark_forest_hypothesis" target="_blank" rel="noopener">dark forest</a>" hypothesis), or might use technologies we can\'t detect. <a href="https://en.wikipedia.org/wiki/Search_for_extraterrestrial_intelligence" target="_blank" rel="noopener">SETI</a> searches for such signals.'}
       />
 
       <ParameterSlider
         bind:value={civilizationSurvival}
         min={100} max={10_000_000_000} step={1}
-        unit="vuotta"
-        label="Kuinka monta vuotta sivilisaatiot selviytyvät keskimäärin?"
+        unit="years"
+        label="How many years do civilizations survive on average?"
         logScale={true}
+        info={'This is one of the most uncertain parameters in the <a href="https://en.wikipedia.org/wiki/Drake_equation" target="_blank" rel="noopener">Drake equation</a>. Estimates range from a few hundred years (if technological civilizations tend to self-destruct through nuclear war, climate change, or AI) to millions or billions of years (if some manage to achieve long-term stability). Drake himself estimated 10,000 years. See <a href="https://en.wikipedia.org/wiki/Global_catastrophic_risk" target="_blank" rel="noopener">global catastrophic risk</a> and the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a> for more context.'}
       />
 
       <CivilizationAgeCurve
@@ -368,49 +385,49 @@
 
       {#if timeWarning}
         <div class="warning">
-          Varoitus: Elämän kehitykseen tarvittava aika ({totalTimeRequired.toFixed(1)} mrd v)
-          ylittää kolmannen sukupolven tähtikuntien iän ({ageThirdGen} mrd v).
-          Tämä tarkoittaa, ettei yksikään sivilisaatio ole ehtinyt kehittyä.
+          Warning: The time required for life to develop ({totalTimeRequired.toFixed(1)} bn yr)
+          exceeds the age of third-generation star systems ({ageThirdGen} bn yr).
+          This means no civilization has had enough time to evolve.
         </div>
       {/if}
     </section>
 
     <!-- Results -->
     <section class="card results-card">
-      <h2>Tulokset</h2>
-      <p class="section-subtitle">Results</p>
+      <h2>Results</h2>
+      <p class="section-subtitle">Summary of your Drake equation estimate</p>
 
       <div class="results-grid">
         <div class="result-row">
-          <span class="result-label">Aikaikkuna, jolloin elämää on voinut syntyä</span>
-          <span class="result-value">{timeWindowForLife.toFixed(1)} miljardia vuotta</span>
+          <span class="result-label">Time window during which life could have emerged</span>
+          <span class="result-value">{timeWindowForLife.toFixed(1)} billion years</span>
         </div>
 
         <div class="result-row">
-          <span class="result-label">Planeettoja, joilla on elämää</span>
+          <span class="result-label">Planets with life</span>
           <span class="result-value">{formatNumber(planetsWithLife)}</span>
         </div>
 
         <div class="result-row">
-          <span class="result-label">Planeettoja, joilla on älykästä elämää</span>
+          <span class="result-label">Planets with intelligent life</span>
           <span class="result-value">{formatNumber(planetsWithIntelligentLife)}</span>
         </div>
 
         <div class="result-row">
-          <span class="result-label">Sivilisaatioita, jotka ovat koskaan kehittyneet</span>
+          <span class="result-label">Civilizations that have ever developed</span>
           <span class="result-value">{formatNumber(totalCivilizations)}</span>
         </div>
 
         <div class="result-row">
-          <span class="result-label">Aika, jolloin sivilisaatioita on ehtinyt kehittyä</span>
-          <span class="result-value">{formatNumber(civilizationTimeSpan)} vuotta</span>
+          <span class="result-label">Time span during which civilizations could evolve</span>
+          <span class="result-value">{formatNumber(civilizationTimeSpan)} years</span>
         </div>
 
         <div class="result-row">
-          <span class="result-label">Uusi sivilisaatio kehittyy keskimäärin</span>
+          <span class="result-label">A new civilization emerges on average</span>
           <span class="result-value">
             {#if isFinite(newCivilizationFrequency) && newCivilizationFrequency > 0}
-              joka {formatNumber(newCivilizationFrequency)}:s vuosi
+              every {formatNumber(newCivilizationFrequency)} years
             {:else}
               -
             {/if}
@@ -420,32 +437,32 @@
         <div class="result-divider"></div>
 
         <div class="result-row highlight" bind:this={resultsEl}>
-          <span class="result-label">Sivilisaatioita Linnunradassa tällä hetkellä</span>
+          <span class="result-label">Civilizations in the Milky Way right now</span>
           <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
         </div>
 
         <div class="result-row highlight-secondary">
-          <span class="result-label">Joista havaittavia (kommunikoivia)</span>
+          <span class="result-label">Of which detectable (communicating)</span>
           <span class="result-value">{formatNumber(detectableCivilizations)}</span>
         </div>
 
         {#if avgDistance !== null}
           <div class="result-row">
-            <span class="result-label">Keskimääräinen etäisyys sivilisaatioiden välillä</span>
-            <span class="result-value">{formatNumber(avgDistance)} valovuotta</span>
+            <span class="result-label">Average distance between civilizations</span>
+            <span class="result-value">{formatNumber(avgDistance)} light-years</span>
           </div>
         {/if}
 
         {#if currentCivilizations < 1 && !timeWarning}
           <div class="lonely-message">
-            Parametreillasi Linnunradassa ei todennäköisesti ole yhtään samanaikaista sivilisaatiota
-            — olemme todennäköisesti yksin.
+            With your parameters, there are likely no simultaneous civilizations in the Milky Way
+            — we are probably alone.
           </div>
         {/if}
 
         {#if currentCivilizations >= 1 && currentCivilizations < 2}
           <div class="lonely-message hopeful">
-            Parametreillasi Linnunradassa on ehkä vain yksi sivilisaatio — mahdollisesti me.
+            With your parameters, there may be only one civilization in the Milky Way — possibly us.
           </div>
         {/if}
       </div>
@@ -453,10 +470,10 @@
   </main>
 
   <footer>
-    <button class="reset-btn" onclick={reset}>Palauta oletusarvot</button>
+    <button class="reset-btn" onclick={reset}>Reset to defaults</button>
     <p class="footer-note">
-      Perustuu Frank Draken vuonna 1961 esittämään yhtälöön, laajennettuna
-      lisäparametreilla elämän edellytyksistä.
+      Based on the equation proposed by Frank Drake in 1961, extended with
+      additional parameters for the prerequisites of life.
     </p>
   </footer>
 </div>
