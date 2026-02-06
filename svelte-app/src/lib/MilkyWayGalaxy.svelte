@@ -184,11 +184,15 @@
     };
     civilizationStars.push(sunStar);
 
-    // Scale civilization dots: 1:1 up to 50, then logarithmic growth capped at 100
+    // Scale green dots proportionally to the galaxy, same as regular stars.
+    // Each regular dot represents (numberOfStars * 1e9 / TOTAL_STARS) real stars,
+    // so green dots = civs / that same ratio. For small counts we still show
+    // at least 1 dot per civilization (up to 50) so they remain visible.
     const others = civCount - 1;
-    const otherCount = others <= 50
-      ? others
-      : Math.min(100, Math.round(50 + 20 * Math.log10(others / 50)));
+    const proportional = numberOfStars > 0
+      ? Math.round(others * TOTAL_STARS / (numberOfStars * 1e9))
+      : others;
+    const otherCount = Math.min(TOTAL_STARS, Math.max(Math.min(others, 50), proportional));
     for (let i = 0; i < otherCount; i++) {
       const r = 0.25 + Math.random() * 0.55;
       const angle = Math.random() * Math.PI * 2;
@@ -297,8 +301,12 @@
       ctx.globalAlpha = 1;
 
       // --- Draw civilization stars using pre-rendered sprites ---
+      // Scale down sprites when many are displayed so they don't overwhelm
+      const civLen = civilizationStars.length;
+      const civScale = civLen <= 50 ? 1.0 : Math.max(0.35, 50 / civLen);
+
       let sunX = 0, sunY = 0, hasSun = false;
-      for (let i = 0; i < civilizationStars.length; i++) {
+      for (let i = 0; i < civLen; i++) {
         const civ = civilizationStars[i];
         const ca = civ.angle + time * civ.orbitalSpeed;
         const x = cx + Math.cos(ca) * civ.r * w045;
@@ -306,9 +314,12 @@
 
         const twinkle = 0.7 + 0.3 * Math.sin(time * civ.twinkleSpeed + civ.twinkleOffset);
         const sprite = civ.isSun ? civSunSprite : civOtherSprite;
+        const s = civ.isSun ? Math.max(civScale, 0.6) : civScale;
+        const dim = sprite.half * 2 * s;
+        const off = dim / 2;
 
         ctx.globalAlpha = twinkle;
-        ctx.drawImage(sprite.canvas, x - sprite.half, y - sprite.half);
+        ctx.drawImage(sprite.canvas, x - off, y - off, dim, dim);
 
         if (civ.isSun) {
           sunX = x;
