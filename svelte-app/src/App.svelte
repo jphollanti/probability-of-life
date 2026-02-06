@@ -2,7 +2,9 @@
   import ParameterSlider from './lib/ParameterSlider.svelte';
   import CivilizationAgeCurve from './lib/CivilizationAgeCurve.svelte';
   import MilkyWayGalaxy from './lib/MilkyWayGalaxy.svelte';
-  import { formatNumber } from './lib/formatNumber.js';
+  import ResultDistribution from './lib/ResultDistribution.svelte';
+  import { formatNumber, formatRange, formatCompact } from './lib/formatNumber.js';
+  import { getEffectiveMean, getDistributionStats, getConfidenceInterval, getModelInsight, probZero } from './lib/survivalMath.js';
 
   // === DEFAULT VALUES ===
   const DEFAULTS = {
@@ -23,6 +25,7 @@
     timeToCivilization: 0.1,
     ratioCommunication: 50,
     civilizationSurvival: 100_000,
+    survivalModel: 'gaussian',
   };
 
   // === STATE ===
@@ -122,17 +125,39 @@
     totalCivilizations > 0 ? civilizationTimeSpan / totalCivilizations : Infinity
   );
 
-  // Current civilizations alive in the galaxy
+  // Effective mean lifetime, accounting for distribution model
+  let effectiveMeanLifetime = $derived(
+    getEffectiveMean(survivalModel, civilizationSurvival)
+  );
+
+  // Distribution statistics for display
+  let distributionStats = $derived(
+    getDistributionStats(survivalModel, civilizationSurvival)
+  );
+
+  // Current civilizations alive in the galaxy (Poisson lambda)
   let currentCivilizations = $derived(
     newCivilizationFrequency > 0 && isFinite(newCivilizationFrequency)
-      ? civilizationSurvival / newCivilizationFrequency
+      ? effectiveMeanLifetime / newCivilizationFrequency
       : 0
   );
+
+  // Confidence intervals from Poisson model
+  let ci90 = $derived(getConfidenceInterval(currentCivilizations, 0.90));
+  let ci50 = $derived(getConfidenceInterval(currentCivilizations, 0.50));
+
+  // Probability of zero civilizations
+  let pZero = $derived(probZero(currentCivilizations));
 
   // Of those, how many have detectable communication?
   let detectableCivilizations = $derived(
     currentCivilizations * (ratioCommunication / 100)
   );
+
+  let detectableCI90 = $derived({
+    lower: ci90.lower * (ratioCommunication / 100),
+    upper: ci90.upper * (ratioCommunication / 100),
+  });
 
   // Average distance between civilizations (light-years)
   // Milky Way disk: ~100,000 ly diameter, ~1,000 ly thick
@@ -141,6 +166,20 @@
     currentCivilizations > 1
       ? Math.cbrt(MILKY_WAY_VOLUME_LY3 / currentCivilizations)
       : null
+  );
+
+  let distanceRange = $derived(
+    ci90.upper > 1 && ci90.lower > 1
+      ? {
+          near: Math.cbrt(MILKY_WAY_VOLUME_LY3 / ci90.upper),
+          far: Math.cbrt(MILKY_WAY_VOLUME_LY3 / ci90.lower),
+        }
+      : null
+  );
+
+  // Model insight text
+  let modelInsight = $derived(
+    getModelInsight(survivalModel, civilizationSurvival, currentCivilizations)
   );
 
   // === SCROLL TRACKING ===
@@ -192,6 +231,7 @@
     timeToCivilization = DEFAULTS.timeToCivilization;
     ratioCommunication = DEFAULTS.ratioCommunication;
     civilizationSurvival = DEFAULTS.civilizationSurvival;
+    survivalModel = DEFAULTS.survivalModel;
   }
 </script>
 
@@ -208,12 +248,20 @@
     <div class="hero-civilization" bind:this={heroEl}>
       <span class="hero-label">Civilizations in the Milky Way right now</span>
       <span class="hero-value">{formatNumber(currentCivilizations, 1)}</span>
+      {#if currentCivilizations > 0}
+        <span class="hero-range">90% range: {formatRange(ci90.lower, ci90.upper)}</span>
+      {/if}
     </div>
   </header>
 
   <div class="floating-header" class:visible={showFloatingHeader}>
     <span class="floating-label">Civilizations now</span>
-    <span class="floating-value">{formatNumber(currentCivilizations, 1)}</span>
+    <span class="floating-value">
+      {formatCompact(currentCivilizations)}
+      {#if currentCivilizations > 0}
+        <span class="floating-range">({formatRange(ci90.lower, ci90.upper)})</span>
+      {/if}
+    </span>
   </div>
 
   <main>
@@ -382,6 +430,7 @@
       <CivilizationAgeCurve
         meanSurvival={civilizationSurvival}
         bind:model={survivalModel}
+        effectiveMean={effectiveMeanLifetime}
       />
 
       {#if timeWarning}
@@ -396,7 +445,7 @@
     <!-- Results -->
     <section class="card results-card">
       <h2>Results</h2>
-      <p class="section-subtitle">Summary of your Drake equation estimate</p>
+      <p class="section-subtitle">Estimate based on {distributionStats.modelLabel} survival model</p>
 
       <div class="results-grid">
         <div class="result-row">
@@ -435,35 +484,82 @@
           </span>
         </div>
 
+        {#if survivalModel === 'lognormal'}
+          <div class="result-row">
+            <span class="result-label">Effective mean survival time</span>
+            <span class="result-value">
+              {formatNumber(effectiveMeanLifetime)} years
+              <span class="result-note">(median: {formatNumber(civilizationSurvival)} yr)</span>
+            </span>
+          </div>
+        {/if}
+
         <div class="result-divider"></div>
 
         <div class="result-row highlight" bind:this={resultsEl}>
           <span class="result-label">Civilizations in the Milky Way right now</span>
-          <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
+          <span class="result-value-stack">
+            <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
+            {#if currentCivilizations > 0}
+              <span class="result-ci">90% range: {formatRange(ci90.lower, ci90.upper)}</span>
+            {/if}
+          </span>
         </div>
+
+        {#if currentCivilizations > 0 && currentCivilizations < 200}
+          <ResultDistribution
+            expectedCount={currentCivilizations}
+            {ci90}
+            {ci50}
+            model={survivalModel}
+          />
+        {/if}
 
         <div class="result-row highlight-secondary">
           <span class="result-label">Of which detectable (communicating)</span>
-          <span class="result-value">{formatNumber(detectableCivilizations)}</span>
+          <span class="result-value-stack">
+            <span class="result-value">{formatNumber(detectableCivilizations)}</span>
+            {#if detectableCivilizations > 0}
+              <span class="result-ci">{formatRange(detectableCI90.lower, detectableCI90.upper)}</span>
+            {/if}
+          </span>
         </div>
 
         {#if avgDistance !== null}
           <div class="result-row">
             <span class="result-label">Average distance between civilizations</span>
-            <span class="result-value">{formatNumber(avgDistance)} light-years</span>
+            <span class="result-value-stack">
+              <span class="result-value">{formatNumber(avgDistance)} light-years</span>
+              {#if distanceRange}
+                <span class="result-ci">{formatRange(distanceRange.near, distanceRange.far)} ly</span>
+              {/if}
+            </span>
           </div>
         {/if}
 
         {#if currentCivilizations < 1 && !timeWarning}
           <div class="lonely-message">
-            With your parameters, there are likely no simultaneous civilizations in the Milky Way
-            — we are probably alone.
+            {#if pZero > 0.5}
+              With your parameters, there is a {(pZero * 100).toFixed(0)}% chance of zero
+              simultaneous civilizations — we are most likely alone.
+            {:else}
+              With your parameters, there are likely no simultaneous civilizations in the Milky Way
+              — we are probably alone.
+            {/if}
           </div>
         {/if}
 
         {#if currentCivilizations >= 1 && currentCivilizations < 2}
           <div class="lonely-message hopeful">
             With your parameters, there may be only one civilization in the Milky Way — possibly us.
+            There is still a {((1 - probZero(currentCivilizations) - currentCivilizations * Math.exp(-currentCivilizations)) * 100).toFixed(0)}% chance of 2 or more.
+          </div>
+        {/if}
+
+        <!-- Model insight -->
+        {#if currentCivilizations > 0}
+          <div class="model-insight">
+            {modelInsight}
           </div>
         {/if}
       </div>
@@ -546,6 +642,12 @@
     line-height: 1.1;
   }
 
+  .hero-range {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+  }
+
   /* Floating header */
   .floating-header {
     position: fixed;
@@ -585,6 +687,13 @@
     font-weight: 700;
     color: var(--gold);
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+
+  .floating-range {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 0.25rem;
   }
 
   .card {
@@ -708,6 +817,39 @@
     font-weight: 600;
   }
 
+  .result-value-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .result-ci {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 0.15rem;
+  }
+
+  .result-note {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .model-insight {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(74, 158, 255, 0.06);
+    border-left: 3px solid rgba(74, 158, 255, 0.3);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-style: italic;
+  }
+
   .lonely-message {
     text-align: center;
     padding: 1rem;
@@ -779,6 +921,10 @@
 
     .result-value {
       text-align: left;
+    }
+
+    .result-value-stack {
+      align-items: flex-start;
     }
 
     .highlight .result-value.big {
