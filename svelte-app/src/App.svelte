@@ -1,6 +1,7 @@
 <script>
   import ParameterSlider from './lib/ParameterSlider.svelte';
   import CivilizationAgeCurve from './lib/CivilizationAgeCurve.svelte';
+  import MilkyWayGalaxy from './lib/MilkyWayGalaxy.svelte';
   import { formatNumber } from './lib/formatNumber.js';
 
   // === DEFAULT VALUES ===
@@ -467,6 +468,12 @@
         {/if}
       </div>
     </section>
+
+    <!-- Milky Way Visualization -->
+    <MilkyWayGalaxy
+      currentCivilizations={currentCivilizations}
+      numberOfStars={numberOfStars}
+    />
   </main>
 
   <footer>
