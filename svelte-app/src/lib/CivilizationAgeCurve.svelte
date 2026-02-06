@@ -2,6 +2,7 @@
   let {
     meanSurvival = 100_000,
     model = $bindable('gaussian'),
+    effectiveMean = null,
   } = $props();
 
   // --- Distribution functions (return PDF value at x) ---
@@ -125,10 +126,19 @@
     return d;
   });
 
-  // Mean marker x position
+  // Mean marker x position (slider value — this is the median for lognormal)
   let meanX = $derived.by(() => {
     const { xMin, xMax } = curveData;
     return PADDING.left + ((meanSurvival - xMin) / (xMax - xMin)) * PLOT_W;
+  });
+
+  // Effective mean marker x position (only relevant for lognormal where median != mean)
+  let effectiveMeanX = $derived.by(() => {
+    if (!effectiveMean || model !== 'lognormal') return null;
+    const { xMin, xMax } = curveData;
+    const x = PADDING.left + ((effectiveMean - xMin) / (xMax - xMin)) * PLOT_W;
+    if (x < PADDING.left || x > PADDING.left + PLOT_W) return null;
+    return x;
   });
 
   // --- X-axis ticks ---
@@ -219,6 +229,27 @@
         font-weight="600"
       >
         {model === 'lognormal' ? 'median' : 'mean'} ({formatAxisValue(meanSurvival)})
+      </text>
+    {/if}
+
+    <!-- Effective mean marker (lognormal only) -->
+    {#if effectiveMeanX !== null}
+      <line
+        x1={effectiveMeanX} y1={PADDING.top}
+        x2={effectiveMeanX} y2={PADDING.top + PLOT_H}
+        stroke="#4a9eff"
+        stroke-width="1.5"
+        stroke-dasharray="6 4"
+      />
+      <text
+        x={effectiveMeanX}
+        y={PADDING.top - 6}
+        text-anchor="middle"
+        fill="#4a9eff"
+        font-size="11"
+        font-weight="600"
+      >
+        mean ({formatAxisValue(effectiveMean)})
       </text>
     {/if}
 
