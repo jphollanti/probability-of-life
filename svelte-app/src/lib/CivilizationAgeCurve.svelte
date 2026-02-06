@@ -1,7 +1,7 @@
 <script>
   let {
     meanSurvival = 100_000,
-    model = 'gaussian',
+    model = $bindable('gaussian'),
   } = $props();
 
   // --- Distribution functions (return PDF value at x) ---
