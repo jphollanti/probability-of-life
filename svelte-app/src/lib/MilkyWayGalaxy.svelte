@@ -14,100 +14,161 @@
   // Galaxy parameters
   const TOTAL_STARS = 600;
   const SPIRAL_ARMS = 2;
-  const TILT = 0.35; // vertical compression for the oval appearance
+  const TILT = 0.35;
   const BASE_ROTATION_SPEED = 0.00008;
+  const TARGET_FRAME_MS = 33; // ~30fps – saves battery on mobile
 
-  // Generate stars once
   let stars = $state([]);
   let civilizationStars = $state([]);
   let sunStar = $state(null);
 
+  // --- Pre-rendered sprite caches (avoid per-frame gradient creation) ---
+  let civSunSprite = null;
+  let civOtherSprite = null;
+  let bgLayer = null;       // cached static background
+  let bgW = 0;
+  let bgH = 0;
+
+  function createCivSprite(isSun) {
+    const glowRadius = isSun ? 12 : 9;
+    const coreSize = isSun ? 2.5 : 2.2;
+    const dim = Math.ceil((glowRadius + 2) * 2);
+    const c = document.createElement('canvas');
+    c.width = dim;
+    c.height = dim;
+    const g = c.getContext('2d');
+    const mid = dim / 2;
+
+    const grad = g.createRadialGradient(mid, mid, 0, mid, mid, glowRadius);
+    if (isSun) {
+      grad.addColorStop(0, 'rgba(255, 230, 100, 1)');
+      grad.addColorStop(0.3, 'rgba(180, 255, 80, 0.7)');
+      grad.addColorStop(1, 'rgba(80, 200, 50, 0)');
+    } else {
+      grad.addColorStop(0, 'rgba(150, 255, 100, 1)');
+      grad.addColorStop(0.3, 'rgba(100, 220, 60, 0.6)');
+      grad.addColorStop(1, 'rgba(60, 180, 40, 0)');
+    }
+    g.beginPath();
+    g.arc(mid, mid, glowRadius, 0, Math.PI * 2);
+    g.fillStyle = grad;
+    g.fill();
+
+    g.beginPath();
+    g.arc(mid, mid, coreSize, 0, Math.PI * 2);
+    g.fillStyle = isSun ? 'rgba(255, 255, 180, 1)' : 'rgba(180, 255, 140, 1)';
+    g.fill();
+
+    return { canvas: c, half: mid };
+  }
+
+  function initSprites() {
+    civSunSprite = createCivSprite(true);
+    civOtherSprite = createCivSprite(false);
+  }
+
+  function renderBackground(w, h) {
+    if (!bgLayer) {
+      bgLayer = document.createElement('canvas');
+    }
+    bgLayer.width = w;
+    bgLayer.height = h;
+    const b = bgLayer.getContext('2d');
+    const cx = w / 2;
+    const cy = h / 2;
+
+    // Center glow
+    const cg = b.createRadialGradient(cx, cy, 0, cx, cy, w * 0.08);
+    cg.addColorStop(0, 'rgba(255, 240, 200, 0.12)');
+    cg.addColorStop(0.5, 'rgba(200, 180, 150, 0.04)');
+    cg.addColorStop(1, 'rgba(100, 100, 150, 0)');
+    b.beginPath();
+    b.arc(cx, cy, w * 0.08, 0, Math.PI * 2);
+    b.fillStyle = cg;
+    b.fill();
+
+    // Dust band
+    b.globalAlpha = 0.025;
+    const dg = b.createLinearGradient(cx - w * 0.4, cy, cx + w * 0.4, cy);
+    dg.addColorStop(0, 'transparent');
+    dg.addColorStop(0.3, 'rgba(100, 120, 180, 1)');
+    dg.addColorStop(0.5, 'rgba(150, 140, 180, 1)');
+    dg.addColorStop(0.7, 'rgba(100, 120, 180, 1)');
+    dg.addColorStop(1, 'transparent');
+    b.beginPath();
+    b.ellipse(cx, cy, w * 0.43, h * 0.43 * TILT * 0.5, 0, 0, Math.PI * 2);
+    b.fillStyle = dg;
+    b.fill();
+    b.globalAlpha = 1;
+
+    bgW = w;
+    bgH = h;
+  }
+
   function generateStars() {
-    stars = [];
+    const result = [];
     for (let i = 0; i < TOTAL_STARS; i++) {
-      // Distribute along spiral arms with some spread
       const arm = i % SPIRAL_ARMS;
       const armOffset = (arm / SPIRAL_ARMS) * Math.PI * 2;
-
-      // Distance from center: use sqrt for more uniform distribution in disk
       const t = Math.random();
       const r = 0.05 + Math.sqrt(t) * 0.9;
-
-      // Spiral angle based on distance
       const spiralAngle = r * 3.5 + armOffset;
       const spread = (1 - r * 0.5) * 0.6;
       const angle = spiralAngle + (Math.random() - 0.5) * spread;
-
-      // Some scatter for galactic bulge
       const isBulge = Math.random() < 0.15;
       const finalR = isBulge ? Math.random() * 0.2 : r;
       const finalAngle = isBulge ? Math.random() * Math.PI * 2 : angle;
 
-      // Size: smaller stars further from center, occasional bright ones
       const sizeFactor = Math.random();
       const size = sizeFactor < 0.7 ? 0.5 + Math.random() * 0.8
                  : sizeFactor < 0.95 ? 1.0 + Math.random() * 0.8
                  : 1.8 + Math.random() * 1.0;
 
-      // Brightness variation
       const brightness = 0.3 + Math.random() * 0.7;
 
-      // Slight color variation for white/gray stars
       const colorTemp = Math.random();
       let r_c, g_c, b_c;
       if (colorTemp < 0.1) {
-        // Blueish
-        r_c = 180 + Math.random() * 40;
-        g_c = 190 + Math.random() * 40;
-        b_c = 255;
+        r_c = 180 + Math.random() * 40; g_c = 190 + Math.random() * 40; b_c = 255;
       } else if (colorTemp < 0.2) {
-        // Yellowish
-        r_c = 255;
-        g_c = 240 + Math.random() * 15;
-        b_c = 180 + Math.random() * 40;
+        r_c = 255; g_c = 240 + Math.random() * 15; b_c = 180 + Math.random() * 40;
       } else if (colorTemp < 0.3) {
-        // Reddish tint
-        r_c = 255;
-        g_c = 180 + Math.random() * 50;
-        b_c = 160 + Math.random() * 40;
+        r_c = 255; g_c = 180 + Math.random() * 50; b_c = 160 + Math.random() * 40;
       } else {
-        // White/gray
-        const w = 200 + Math.random() * 55;
-        r_c = w;
-        g_c = w;
-        b_c = w;
+        const w = 200 + Math.random() * 55; r_c = w; g_c = w; b_c = w;
       }
 
-      // Orbital speed: inner stars orbit faster (Keplerian-ish)
       const orbitalSpeed = BASE_ROTATION_SPEED * (1 + 1.5 / (finalR + 0.3));
-
-      // Add a slight z-offset for depth variation
       const z = (Math.random() - 0.5) * 0.06;
 
-      stars.push({
+      // Pre-compute the CSS color string once (avoid 600 template-literal allocs/frame)
+      const colorStr = `rgb(${Math.round(r_c)},${Math.round(g_c)},${Math.round(b_c)})`;
+
+      result.push({
         r: finalR,
         angle: finalAngle,
         size,
         brightness,
-        color: { r: r_c, g: g_c, b: b_c },
+        colorStr,
         orbitalSpeed,
         z,
         twinkleOffset: Math.random() * Math.PI * 2,
         twinkleSpeed: 0.5 + Math.random() * 2,
+        hasGlow: size > 1.2,
+        // Pre-compute derived draw sizes
+        coreSize: size * 0.6,
+        glowSize: size * 2.5,
       });
     }
+    stars = result;
   }
 
-  // Place civilization stars including our Sun
   function placeCivilizations(count) {
     civilizationStars = [];
     sunStar = null;
-
     const civCount = Math.max(0, Math.round(count));
-
     if (civCount === 0) return;
 
-    // Our Sun: place at roughly 2/3 from center (Sun is ~27,000 ly from center in a ~50,000 ly radius galaxy)
     const sunR = 0.54;
     const sunAngle = Math.random() * Math.PI * 2;
     sunStar = {
@@ -117,17 +178,15 @@
       brightness: 1.0,
       orbitalSpeed: BASE_ROTATION_SPEED * (1 + 1.5 / (sunR + 0.3)),
       z: 0,
-      label: 'Our Sun',
       isSun: true,
       twinkleOffset: Math.random() * Math.PI * 2,
       twinkleSpeed: 0.8 + Math.random() * 1.5,
     };
     civilizationStars.push(sunStar);
 
-    // Other civilizations: spread across the habitable zone of the galaxy
-    const otherCount = Math.min(civCount - 1, 20); // Cap visual representation at 20
+    const otherCount = Math.min(civCount - 1, 20);
     for (let i = 0; i < otherCount; i++) {
-      const r = 0.25 + Math.random() * 0.55; // habitable zone of galaxy
+      const r = 0.25 + Math.random() * 0.55;
       const angle = Math.random() * Math.PI * 2;
       civilizationStars.push({
         r,
@@ -136,7 +195,6 @@
         brightness: 1.0,
         orbitalSpeed: BASE_ROTATION_SPEED * (1 + 1.5 / (r + 0.3)),
         z: 0,
-        label: i < 5 ? `Civilization ${i + 2}` : null,
         isSun: false,
         twinkleOffset: Math.random() * Math.PI * 2,
         twinkleSpeed: 0.8 + Math.random() * 1.5,
@@ -144,19 +202,14 @@
     }
   }
 
-  // Scale info for legend
   let scaleRatio = $derived(
-    numberOfStars > 0
-      ? (numberOfStars * 1e9) / TOTAL_STARS
-      : 1
+    numberOfStars > 0 ? (numberOfStars * 1e9) / TOTAL_STARS : 1
   );
-
   let civCountDisplay = $derived(Math.round(currentCivilizations));
 
-  // Initialize stars
   generateStars();
+  initSprites();
 
-  // Re-place civilizations reactively
   $effect(() => {
     const count = currentCivilizations;
     untrack(() => placeCivilizations(count));
@@ -165,9 +218,9 @@
   // Animation loop
   $effect(() => {
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     let time = 0;
+    let lastFrameTime = 0;
 
     function resize() {
       if (!canvas || !containerEl) return;
@@ -176,132 +229,96 @@
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      bgW = 0; // force background re-render
     }
 
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(containerEl);
 
-    function drawStar(cx, cy, star, currentAngle, w, h, isLife, isSun) {
-      const x = cx + Math.cos(currentAngle) * star.r * w * 0.45;
-      const rawY = Math.sin(currentAngle) * star.r * h * 0.45 * TILT;
-      const y = cy + rawY + star.z * h * 0.45;
-
-      // Twinkle
-      const twinkle = 0.7 + 0.3 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset);
-      const alpha = star.brightness * twinkle;
-
-      if (isLife) {
-        // Warm green glow for civilization stars
-        const glowRadius = isSun ? 12 : 9;
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
-        if (isSun) {
-          gradient.addColorStop(0, `rgba(255, 230, 100, ${alpha})`);
-          gradient.addColorStop(0.3, `rgba(180, 255, 80, ${alpha * 0.7})`);
-          gradient.addColorStop(1, `rgba(80, 200, 50, 0)`);
-        } else {
-          gradient.addColorStop(0, `rgba(150, 255, 100, ${alpha})`);
-          gradient.addColorStop(0.3, `rgba(100, 220, 60, ${alpha * 0.6})`);
-          gradient.addColorStop(1, `rgba(60, 180, 40, 0)`);
-        }
-        ctx.beginPath();
-        ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        // Core
-        ctx.beginPath();
-        ctx.arc(x, y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = isSun
-          ? `rgba(255, 255, 180, ${alpha})`
-          : `rgba(180, 255, 140, ${alpha})`;
-        ctx.fill();
-      } else {
-        // Normal star
-        const { r: rc, g: gc, b: bc } = star.color;
-
-        // Subtle glow for larger stars
-        if (star.size > 1.2) {
-          const gradient = ctx.createRadialGradient(x, y, 0, x, y, star.size * 3);
-          gradient.addColorStop(0, `rgba(${rc}, ${gc}, ${bc}, ${alpha * 0.3})`);
-          gradient.addColorStop(1, `rgba(${rc}, ${gc}, ${bc}, 0)`);
-          ctx.beginPath();
-          ctx.arc(x, y, star.size * 3, 0, Math.PI * 2);
-          ctx.fillStyle = gradient;
-          ctx.fill();
-        }
-
-        ctx.beginPath();
-        ctx.arc(x, y, star.size * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${rc}, ${gc}, ${bc}, ${alpha})`;
-        ctx.fill();
-      }
-
-      return { x, y };
-    }
-
-    function drawLabel(x, y, text, isSun) {
-      ctx.font = `${isSun ? '11px' : '10px'} -apple-system, BlinkMacSystemFont, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillStyle = isSun
-        ? 'rgba(255, 245, 180, 0.9)'
-        : 'rgba(180, 255, 150, 0.8)';
-      ctx.fillText(text, x, y - 14);
-    }
-
-    function animate() {
+    function animate(timestamp) {
       if (!canvas) return;
-      const w = canvas.width / (window.devicePixelRatio || 1);
-      const h = canvas.height / (window.devicePixelRatio || 1);
+
+      // Throttle to ~30fps for battery savings
+      if (timestamp - lastFrameTime < TARGET_FRAME_MS) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTime = timestamp;
+
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
       const cx = w / 2;
       const cy = h / 2;
+      const w045 = w * 0.45;
+      const h045t = h * 0.45 * TILT;
+      const hz045 = h * 0.45;
 
       ctx.clearRect(0, 0, w, h);
 
-      // Draw galactic center glow
-      const centerGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.08);
-      centerGlow.addColorStop(0, 'rgba(255, 240, 200, 0.12)');
-      centerGlow.addColorStop(0.5, 'rgba(200, 180, 150, 0.04)');
-      centerGlow.addColorStop(1, 'rgba(100, 100, 150, 0)');
-      ctx.beginPath();
-      ctx.arc(cx, cy, w * 0.08, 0, Math.PI * 2);
-      ctx.fillStyle = centerGlow;
-      ctx.fill();
-
-      // Faint dust/nebula band through the disk
-      ctx.save();
-      ctx.globalAlpha = 0.025;
-      const dustGrad = ctx.createLinearGradient(cx - w * 0.4, cy, cx + w * 0.4, cy);
-      dustGrad.addColorStop(0, 'transparent');
-      dustGrad.addColorStop(0.3, 'rgba(100, 120, 180, 1)');
-      dustGrad.addColorStop(0.5, 'rgba(150, 140, 180, 1)');
-      dustGrad.addColorStop(0.7, 'rgba(100, 120, 180, 1)');
-      dustGrad.addColorStop(1, 'transparent');
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, w * 0.43, h * 0.43 * TILT * 0.5, 0, 0, Math.PI * 2);
-      ctx.fillStyle = dustGrad;
-      ctx.fill();
-      ctx.restore();
-
-      // Draw regular stars
-      for (const star of stars) {
-        const currentAngle = star.angle + time * star.orbitalSpeed;
-        drawStar(cx, cy, star, currentAngle, w, h, false, false);
+      // Draw cached static background (center glow + dust band)
+      if (bgW !== w || bgH !== h) {
+        renderBackground(w, h);
       }
+      ctx.drawImage(bgLayer, 0, 0);
 
-      // Draw civilization stars on top
-      const labelPositions = [];
-      for (const civ of civilizationStars) {
-        const currentAngle = civ.angle + time * civ.orbitalSpeed;
-        const pos = drawStar(cx, cy, civ, currentAngle, w, h, true, civ.isSun);
-        if (civ.label && pos) {
-          labelPositions.push({ ...pos, label: civ.label, isSun: civ.isSun });
+      // --- Draw regular stars (optimised: fillRect, no arc/gradient per frame) ---
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
+        const ca = s.angle + time * s.orbitalSpeed;
+        const x = cx + Math.cos(ca) * s.r * w045;
+        const y = cy + Math.sin(ca) * s.r * h045t + s.z * hz045;
+
+        const alpha = s.brightness * (0.7 + 0.3 * Math.sin(time * s.twinkleSpeed + s.twinkleOffset));
+
+        ctx.fillStyle = s.colorStr;
+
+        if (s.hasGlow) {
+          // ~30% of stars: soft square glow + core (fillRect, no gradient)
+          ctx.globalAlpha = alpha * 0.15;
+          const gs = s.glowSize;
+          ctx.fillRect(x - gs, y - gs, gs * 2, gs * 2);
+          ctx.globalAlpha = alpha;
+          const cs = s.coreSize;
+          ctx.fillRect(x - cs * 0.5, y - cs * 0.5, cs, cs);
+        } else {
+          // ~70% of stars: single tiny fillRect (fastest path)
+          ctx.globalAlpha = alpha;
+          const cs = s.coreSize;
+          ctx.fillRect(x - cs * 0.5, y - cs * 0.5, cs, cs);
         }
       }
+      ctx.globalAlpha = 1;
 
-      // Draw labels
-      for (const lp of labelPositions) {
-        drawLabel(lp.x, lp.y, lp.label, lp.isSun);
+      // --- Draw civilization stars using pre-rendered sprites ---
+      let sunX = 0, sunY = 0, hasSun = false;
+      for (let i = 0; i < civilizationStars.length; i++) {
+        const civ = civilizationStars[i];
+        const ca = civ.angle + time * civ.orbitalSpeed;
+        const x = cx + Math.cos(ca) * civ.r * w045;
+        const y = cy + Math.sin(ca) * civ.r * h045t + civ.z * hz045;
+
+        const twinkle = 0.7 + 0.3 * Math.sin(time * civ.twinkleSpeed + civ.twinkleOffset);
+        const sprite = civ.isSun ? civSunSprite : civOtherSprite;
+
+        ctx.globalAlpha = twinkle;
+        ctx.drawImage(sprite.canvas, x - sprite.half, y - sprite.half);
+
+        if (civ.isSun) {
+          sunX = x;
+          sunY = y;
+          hasSun = true;
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      // Only label Our Sun
+      if (hasSun) {
+        ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(255, 245, 180, 0.9)';
+        ctx.fillText('Our Sun', sunX, sunY - 14);
       }
 
       time += 1;
