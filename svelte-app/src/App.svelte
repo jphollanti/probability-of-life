@@ -1,5 +1,6 @@
 <script>
   import ParameterSlider from './lib/ParameterSlider.svelte';
+  import CivilizationAgeCurve from './lib/CivilizationAgeCurve.svelte';
   import { formatNumber } from './lib/formatNumber.js';
 
   // === DEFAULT VALUES ===
@@ -41,6 +42,7 @@
   let timeToCivilization = $state(DEFAULTS.timeToCivilization);
   let ratioCommunication = $state(DEFAULTS.ratioCommunication);
   let civilizationSurvival = $state(DEFAULTS.civilizationSurvival);
+  let survivalModel = $state('gaussian');
 
   // === DERIVED CALCULATIONS ===
 
@@ -357,6 +359,11 @@
         unit="vuotta"
         label="Kuinka monta vuotta sivilisaatiot selviytyvät keskimäärin?"
         logScale={true}
+      />
+
+      <CivilizationAgeCurve
+        meanSurvival={civilizationSurvival}
+        bind:model={survivalModel}
       />
 
       {#if timeWarning}
