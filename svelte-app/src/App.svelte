@@ -140,6 +140,36 @@
       : null
   );
 
+  // === SCROLL TRACKING ===
+  let heroVisible = $state(true);
+  let resultsVisible = $state(false);
+  let showFloatingHeader = $derived(!heroVisible && !resultsVisible);
+
+  let heroEl = $state(null);
+  let resultsEl = $state(null);
+
+  $effect(() => {
+    if (!heroEl || !resultsEl) return;
+
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => { heroVisible = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+
+    const resultsObserver = new IntersectionObserver(
+      ([entry]) => { resultsVisible = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+
+    heroObserver.observe(heroEl);
+    resultsObserver.observe(resultsEl);
+
+    return () => {
+      heroObserver.disconnect();
+      resultsObserver.disconnect();
+    };
+  });
+
   // Reset to defaults
   function reset() {
     numberOfStars = DEFAULTS.numberOfStars;
@@ -171,7 +201,17 @@
       perustuu <em>Draken yhtälöön</em> ja sen laajennuksiin. Säädä parametreja
       ja katso, miten ne vaikuttavat lopputulokseen.
     </p>
+
+    <div class="hero-civilization" bind:this={heroEl}>
+      <span class="hero-label">Sivilisaatioita Linnunradassa tällä hetkellä</span>
+      <span class="hero-value">{formatNumber(currentCivilizations, 1)}</span>
+    </div>
   </header>
+
+  <div class="floating-header" class:visible={showFloatingHeader}>
+    <span class="floating-label">Sivilisaatioita nyt</span>
+    <span class="floating-value">{formatNumber(currentCivilizations, 1)}</span>
+  </div>
 
   <main>
     <!-- Section 1: Stars and Planets -->
@@ -372,7 +412,7 @@
 
         <div class="result-divider"></div>
 
-        <div class="result-row highlight">
+        <div class="result-row highlight" bind:this={resultsEl}>
           <span class="result-label">Sivilisaatioita Linnunradassa tällä hetkellä</span>
           <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
         </div>
@@ -447,6 +487,73 @@
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
+  }
+
+  /* Hero civilization display */
+  .hero-civilization {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1.5rem 1rem;
+    background: rgba(255, 215, 0, 0.04);
+    border: 1px solid rgba(255, 215, 0, 0.12);
+    border-radius: 12px;
+  }
+
+  .hero-label {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .hero-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 0 25px rgba(255, 215, 0, 0.35);
+    line-height: 1.1;
+  }
+
+  /* Floating header */
+  .floating-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: rgba(10, 10, 26, 0.92);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .floating-header.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .floating-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .floating-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
   }
 
   .card {
@@ -645,6 +752,18 @@
 
     .highlight .result-value.big {
       font-size: 1.3rem;
+    }
+
+    .hero-value {
+      font-size: 2.2rem;
+    }
+
+    .floating-label {
+      font-size: 0.75rem;
+    }
+
+    .floating-value {
+      font-size: 1rem;
     }
   }
 </style>
