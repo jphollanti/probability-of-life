@@ -206,6 +206,30 @@
       : null
   );
 
+  // Detection odds: probability that at least one pair of detectable civilizations
+  // is close enough for their signals to have reached each other.
+  // Detection range ≈ mean lifetime in light-years (signals travel at c).
+  let detectionRange = $derived(effectiveMeanLifetime);
+
+  let pairDetectionProb = $derived(
+    detectionRange > 0
+      ? Math.min(1, (4 / 3) * Math.PI * Math.pow(detectionRange, 3) / MILKY_WAY_VOLUME_LY3)
+      : 0
+  );
+
+  let numDetectablePairs = $derived(
+    detectableCivilizations >= 2
+      ? detectableCivilizations * (detectableCivilizations - 1) / 2
+      : 0
+  );
+
+  // 1 - (1-p)^n computed in log-space for numerical stability
+  let detectionOdds = $derived(
+    numDetectablePairs > 0 && pairDetectionProb > 0
+      ? 1 - Math.exp(numDetectablePairs * Math.log(1 - pairDetectionProb))
+      : 0
+  );
+
   // Model insight text
   let modelInsight = $derived(
     getModelInsight(survivalModel, civilizationSurvival, currentCivilizations)
@@ -626,6 +650,30 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
           </div>
         {/if}
 
+        {#if detectionOdds > 0 && detectableCivilizations >= 2}
+          <div class="detection-odds">
+            <span class="detection-headline">
+              Chance that any two civilizations have detected each other:
+              <strong class="detection-pct">
+                {#if detectionOdds > 0.999}
+                  ~100%
+                {:else if detectionOdds < 0.0001}
+                  &lt; 0.01%
+                {:else if detectionOdds < 0.01}
+                  {(detectionOdds * 100).toFixed(2)}%
+                {:else if detectionOdds < 0.1}
+                  {(detectionOdds * 100).toFixed(1)}%
+                {:else}
+                  {(detectionOdds * 100).toFixed(0)}%
+                {/if}
+              </strong>
+            </span>
+            <span class="detection-detail">
+              Each civilization's signals reach ~{formatNumber(detectionRange)} light-years during its lifetime.
+            </span>
+          </div>
+        {/if}
+
         {#if currentCivilizations < 1 && !timeWarning}
           <div class="lonely-message">
             {#if pZero > 0.5}
@@ -946,6 +994,35 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     font-size: 0.82rem;
     color: var(--text-muted);
     line-height: 1.55;
+    font-style: italic;
+  }
+
+  .detection-odds {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(76, 175, 80, 0.06);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    border-radius: 8px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .detection-headline {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+
+  .detection-pct {
+    color: #66bb6a;
+    font-size: 1.05rem;
+  }
+
+  .detection-detail {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
     font-style: italic;
   }
 
