@@ -645,8 +645,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
   <footer>
     <button class="reset-btn" onclick={reset}>Reset to defaults</button>
     <p class="footer-note">
-      Inspired by the <a href="https://en.wikipedia.org/wiki/Drake_equation" target="_blank" rel="noopener">Drake equation</a> (1961),
-      extended with additional astrophysical and biological parameters.
+      See also: the <a href="https://en.wikipedia.org/wiki/Drake_equation" target="_blank" rel="noopener">Drake equation</a> (1961).
     </p>
   </footer>
 </div>
