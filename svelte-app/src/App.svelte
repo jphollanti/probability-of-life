@@ -746,7 +746,8 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
             </div>
             <span class="earth-check-verdict">
               {#if expectedSignalsAtEarth > 1}
-                Your parameters predict ~{formatNumber(expectedSignalsAtEarth)} signals should have reached Earth in the time we have been listening — the gap with reality is the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a>.
+                Your parameters predict ~{formatNumber(expectedSignalsAtEarth)} signals should have reached Earth in the time we have been listening — yet we have heard nothing. This is the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a>.
+                One sobering resolution: if civilizations only broadcast once they are technologically advanced, the silence may mean they don't last long after that point. Your parameters give each civilization ~{formatNumber(detectionRange)} years of broadcasting — if the true number is much smaller, the galaxy goes quiet fast. The uncomfortable implication for Earth: we started broadcasting {EARTH_LISTENING_YEARS} years ago — are we, too, nearing the end?
               {:else if expectedSignalsAtEarth >= 0.01}
                 There's a {(expectedSignalsAtEarth * 100).toFixed(1)}% chance Earth should have detected a signal by now — our silence is plausible but worth noting.
               {:else}
