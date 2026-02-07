@@ -241,6 +241,29 @@
       : 0
   );
 
+  // === EARTH SANITY CHECK ===
+  // Earth has been listening/broadcasting for ~100 years.
+  // From Earth's perspective, how many alien signals should we expect to have detected?
+  const EARTH_LISTENING_YEARS = 100;
+
+  // Volume fraction of galaxy within Earth's 100-light-year signal sphere
+  let earthSphereFraction = $derived(
+    Math.min(1, (4 / 3) * Math.PI * Math.pow(EARTH_LISTENING_YEARS, 3) / MILKY_WAY_VOLUME_LY3)
+  );
+
+  // Expected number of detectable civilizations whose signals have reached Earth.
+  // Each civilization's signals travel detectionRange light-years; the probability
+  // that Earth falls within any one civilization's signal sphere = pairDetectionProb.
+  let expectedSignalsAtEarth = $derived(
+    detectableCivilizations * pairDetectionProb
+  );
+
+  // Expected number of civilizations that could have detected Earth's signals.
+  // Our signals have only traveled ~100 light-years.
+  let expectedHaveHeardEarth = $derived(
+    detectableCivilizations * earthSphereFraction
+  );
+
   // Model insight text
   let modelInsight = $derived(
     getModelInsight(survivalModel, civilizationSurvival, currentCivilizations)
@@ -704,6 +727,35 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
           </div>
         {/if}
 
+        {#if detectableCivilizations > 0}
+          <div class="earth-check">
+            <span class="earth-check-title">Earth sanity check</span>
+            <span class="earth-check-subtitle">
+              Earthlings have been broadcasting and listening for ~{EARTH_LISTENING_YEARS} years.
+              We have detected 0 alien signals.
+            </span>
+            <div class="earth-check-stats">
+              <div class="earth-stat">
+                <span class="earth-stat-value">{formatNumber(expectedSignalsAtEarth)}</span>
+                <span class="earth-stat-label">signals expected to reach Earth</span>
+              </div>
+              <div class="earth-stat">
+                <span class="earth-stat-value">{formatNumber(expectedHaveHeardEarth)}</span>
+                <span class="earth-stat-label">civilizations have heard Earth</span>
+              </div>
+            </div>
+            <span class="earth-check-verdict">
+              {#if expectedSignalsAtEarth > 1}
+                Your parameters predict ~{formatNumber(expectedSignalsAtEarth)} signals should have reached Earth by now — the gap with reality is the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a>.
+              {:else if expectedSignalsAtEarth >= 0.01}
+                There's a {(expectedSignalsAtEarth * 100).toFixed(1)}% chance Earth should have detected a signal by now — our silence is plausible but worth noting.
+              {:else}
+                Detecting 0 signals is expected — Earth's {EARTH_LISTENING_YEARS}-year listening window is a cosmic blink.
+              {/if}
+            </span>
+          </div>
+        {/if}
+
         {#if currentCivilizations < 1 && !timeWarning}
           <div class="lonely-message">
             {#if pZero > 0.5}
@@ -1054,6 +1106,67 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     color: var(--text-muted);
     margin-top: 0.25rem;
     font-style: italic;
+  }
+
+  .earth-check {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 152, 0, 0.06);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+    border-radius: 8px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .earth-check-title {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #ffb74d;
+    margin-bottom: 0.15rem;
+  }
+
+  .earth-check-subtitle {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .earth-check-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 0.5rem 0;
+  }
+
+  .earth-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .earth-stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffb74d;
+  }
+
+  .earth-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .earth-check-verdict {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 0.25rem;
+  }
+
+  .earth-check-verdict a {
+    color: #ffb74d;
   }
 
   .lonely-message {
