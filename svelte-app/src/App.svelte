@@ -732,7 +732,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
             <span class="earth-check-title">Earth sanity check</span>
             <span class="earth-check-subtitle">
               Earthlings have been broadcasting and listening for ~{EARTH_LISTENING_YEARS} years.
-              We have detected 0 alien signals.
+              We have detected 0 alien signals. With the parameters you have selected, the numbers are:
             </span>
             <div class="earth-check-stats">
               <div class="earth-stat">
@@ -746,7 +746,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
             </div>
             <span class="earth-check-verdict">
               {#if expectedSignalsAtEarth > 1}
-                Your parameters predict ~{formatNumber(expectedSignalsAtEarth)} signals should have reached Earth by now — the gap with reality is the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a>.
+                Your parameters predict ~{formatNumber(expectedSignalsAtEarth)} signals should have reached Earth in the time we have been listening — the gap with reality is the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a>.
               {:else if expectedSignalsAtEarth >= 0.01}
                 There's a {(expectedSignalsAtEarth * 100).toFixed(1)}% chance Earth should have detected a signal by now — our silence is plausible but worth noting.
               {:else}
