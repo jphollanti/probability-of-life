@@ -32,7 +32,7 @@
     },
     lognormal: {
       label: 'Lognormal distribution (Maccone 2010)',
-      description: 'Asymmetric: most civilizations die young, but a few survive for a very long time. Based on Maccone\'s statistical Drake equation.',
+      description: 'Asymmetric: most civilizations die young, but a few survive for a very long time. Based on Maccone\'s statistical extension (2010).',
     },
     exponential: {
       label: 'Exponential decay (Doomsday model)',

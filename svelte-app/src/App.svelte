@@ -260,7 +260,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
 </style></head><body><div class="page">
 <div class="tshirt">
 <h1>There is a God!</h1>
-<p class="sub">I tuned the parameters of the Drake Equation<br>and found exactly one civilization.</p>
+<p class="sub">I tuned the parameters of the Life Calculator<br>and found exactly one civilization.</p>
 <div class="divider"></div>
 <table>${paramRows}</table>
 </div>
@@ -300,8 +300,8 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     <p class="subtitle">Estimating civilizations in the Milky Way</p>
     <p class="intro">
       How many civilizations currently exist in the Milky Way? This calculator
-      is based on the <em>Drake Equation</em> and its extensions. Adjust the parameters
-      and see how they affect the outcome.
+      estimates the probability of extraterrestrial civilizations based on astrophysical,
+      biological, and sociological factors. Adjust the parameters and see how they affect the outcome.
     </p>
 
     <div class="hero-civilization" bind:this={heroEl}>
@@ -483,7 +483,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         unit="years"
         label="How many years do civilizations survive on average?"
         logScale={true}
-        info={'This is one of the most uncertain parameters in the <a href="https://en.wikipedia.org/wiki/Drake_equation" target="_blank" rel="noopener">Drake equation</a>. Estimates range from a few hundred years (if technological civilizations tend to self-destruct through nuclear war, climate change, or AI) to millions or billions of years (if some manage to achieve long-term stability). Drake himself estimated 10,000 years. See <a href="https://en.wikipedia.org/wiki/Global_catastrophic_risk" target="_blank" rel="noopener">global catastrophic risk</a> and the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a> for more context.'}
+        info={'This is one of the most uncertain parameters in estimating galactic civilizations. Estimates range from a few hundred years (if technological civilizations tend to self-destruct through nuclear war, climate change, or AI) to millions or billions of years (if some manage to achieve long-term stability). See <a href="https://en.wikipedia.org/wiki/Global_catastrophic_risk" target="_blank" rel="noopener">global catastrophic risk</a> and the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a> for more context.'}
       />
 
       <CivilizationAgeCurve
@@ -645,8 +645,8 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
   <footer>
     <button class="reset-btn" onclick={reset}>Reset to defaults</button>
     <p class="footer-note">
-      Based on the equation proposed by Frank Drake in 1961, extended with
-      additional parameters for the prerequisites of life.
+      Inspired by the <a href="https://en.wikipedia.org/wiki/Drake_equation" target="_blank" rel="noopener">Drake equation</a> (1961),
+      extended with additional astrophysical and biological parameters.
     </p>
   </footer>
 </div>
