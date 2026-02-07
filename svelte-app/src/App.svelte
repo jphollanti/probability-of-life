@@ -23,6 +23,7 @@
     timeForLifeToAppear: 2,
     timeToIntelligentLife: 1,
     timeToCivilization: 0.1,
+    timeToDetectable: 10_000,
     ratioCommunication: 50,
     civilizationSurvival: 100_000,
     survivalModel: 'gaussian',
@@ -61,6 +62,7 @@
   let timeForLifeToAppear = $state(init('timeForLifeToAppear'));
   let timeToIntelligentLife = $state(init('timeToIntelligentLife'));
   let timeToCivilization = $state(init('timeToCivilization'));
+  let timeToDetectable = $state(init('timeToDetectable'));
   let ratioCommunication = $state(init('ratioCommunication'));
   let civilizationSurvival = $state(init('civilizationSurvival'));
   let survivalModel = $state(init('survivalModel'));
@@ -72,7 +74,7 @@
       ratioHabitableZone, ratioWithWater, ratioGuardianPlanet, ratioIronCore,
       ratioSufficientMass, ratioChemicalPrerequisites, ratioLifeBegins,
       ageThirdGen, timeForLifeToAppear, timeToIntelligentLife, timeToCivilization,
-      ratioCommunication, civilizationSurvival, survivalModel,
+      timeToDetectable, ratioCommunication, civilizationSurvival, survivalModel,
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(params)); } catch {}
   });
@@ -178,9 +180,17 @@
   // Probability of zero civilizations
   let pZero = $derived(probZero(currentCivilizations));
 
+  // Fraction of a civilization's lifetime during which it broadcasts detectable signals.
+  // A civilization must first develop for timeToDetectable years before it starts broadcasting.
+  let detectableFraction = $derived(
+    effectiveMeanLifetime > 0
+      ? Math.max(0, effectiveMeanLifetime - timeToDetectable) / effectiveMeanLifetime
+      : 0
+  );
+
   // Of those, how many have detectable communication?
   let detectableCivilizations = $derived(
-    currentCivilizations * (ratioCommunication / 100)
+    currentCivilizations * (ratioCommunication / 100) * detectableFraction
   );
 
   let detectableCI90 = $derived({
@@ -208,8 +218,9 @@
 
   // Detection odds: probability that at least one pair of detectable civilizations
   // is close enough for their signals to have reached each other.
-  // Detection range ≈ mean lifetime in light-years (signals travel at c).
-  let detectionRange = $derived(effectiveMeanLifetime);
+  // Detection range ≈ broadcasting duration in light-years (signals travel at c).
+  // Civilizations only broadcast for (lifetime - timeToDetectable) years.
+  let detectionRange = $derived(Math.max(0, effectiveMeanLifetime - timeToDetectable));
 
   let pairDetectionProb = $derived(
     detectionRange > 0
@@ -287,6 +298,7 @@
       ['Time for life to appear', `${timeForLifeToAppear} bn yr`],
       ['Time to intelligent life', `${timeToIntelligentLife} bn yr`],
       ['Time to civilization', `${timeToCivilization} bn yr`],
+      ['Time to detectable signals', `${formatNumber(timeToDetectable)} yr`],
       ['Detectable communication', `${ratioCommunication}%`],
       ['Civilization survival', `${formatNumber(civilizationSurvival)} years`],
       ['Survival model', survivalModel],
@@ -341,6 +353,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     timeForLifeToAppear = DEFAULTS.timeForLifeToAppear;
     timeToIntelligentLife = DEFAULTS.timeToIntelligentLife;
     timeToCivilization = DEFAULTS.timeToCivilization;
+    timeToDetectable = DEFAULTS.timeToDetectable;
     ratioCommunication = DEFAULTS.ratioCommunication;
     civilizationSurvival = DEFAULTS.civilizationSurvival;
     survivalModel = DEFAULTS.survivalModel;
@@ -524,6 +537,15 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
       />
 
       <ParameterSlider
+        bind:value={timeToDetectable}
+        min={100} max={1_000_000} step={1}
+        unit="years"
+        label="How long does it take a civilization to develop detectable signals (radio, laser, etc.)? Humans have had radio for about 100 years, but civilization existed for ~10,000 years before that."
+        logScale={true}
+        info={'After a civilization forms, it may take thousands of years before it develops technology that produces detectable signals. On Earth, <a href="https://en.wikipedia.org/wiki/Civilization" target="_blank" rel="noopener">civilization</a> began roughly 10,000 years ago with agriculture and cities, but <a href="https://en.wikipedia.org/wiki/Radio" target="_blank" rel="noopener">radio technology</a> was only invented about 100 years ago. This means Earth was "dark" for 99% of its civilized history. This parameter determines what fraction of a civilization\'s lifetime it spends broadcasting detectable <a href="https://en.wikipedia.org/wiki/Technosignature" target="_blank" rel="noopener">technosignatures</a>, and how far its signals have traveled. If the time to become detectable exceeds the average civilization survival time, no civilization lives long enough to broadcast.'}
+      />
+
+      <ParameterSlider
         bind:value={ratioCommunication}
         min={1} max={100} step={1}
         unit="%"
@@ -551,6 +573,14 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
           Warning: The time required for life to develop ({totalTimeRequired.toFixed(1)} bn yr)
           exceeds the age of third-generation star systems ({ageThirdGen} bn yr).
           This means no civilization has had enough time to evolve.
+        </div>
+      {/if}
+
+      {#if !timeWarning && timeToDetectable >= effectiveMeanLifetime && effectiveMeanLifetime > 0}
+        <div class="warning">
+          Warning: Time to develop detectable signals ({formatNumber(timeToDetectable)} years)
+          exceeds average civilization survival ({formatNumber(effectiveMeanLifetime)} years).
+          No civilization survives long enough to broadcast.
         </div>
       {/if}
     </section>
