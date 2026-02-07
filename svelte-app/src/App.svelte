@@ -8,20 +8,20 @@
 
   // === DEFAULT VALUES ===
   const DEFAULTS = {
-    numberOfStars: 250,
-    ratioWithPlanets: 50,
+    numberOfStars: 200,
+    ratioWithPlanets: 80,
     planetsPerStar: 2,
-    ratioThirdGen: 15,
-    ratioHabitableZone: 15,
-    ratioWithWater: 20,
-    ratioGuardianPlanet: 50,
-    ratioIronCore: 20,
+    ratioThirdGen: 75,
+    ratioHabitableZone: 20,
+    ratioWithWater: 30,
+    ratioGuardianPlanet: 25,
+    ratioIronCore: 40,
     ratioSufficientMass: 30,
     ratioChemicalPrerequisites: 50,
     ratioLifeBegins: 50,
-    ageThirdGen: 6,
-    timeForLifeToAppear: 2,
-    timeToIntelligentLife: 1,
+    ageThirdGen: 8,
+    timeForLifeToAppear: 1,
+    timeToIntelligentLife: 3.5,
     timeToCivilization: 0.1,
     timeToDetectable: 10_000,
     ratioCommunication: 50,
@@ -424,7 +424,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={1000} step={1}
         unit="billion"
         label="The Milky Way is estimated to contain 100–400 billion stars. What is your estimate?"
-        info={'The <a href="https://en.wikipedia.org/wiki/Milky_Way" target="_blank" rel="noopener">Milky Way</a> is a barred spiral galaxy with an estimated diameter of 100,000 light-years. Estimates of its total star count range from 100 to 400 billion, with most modern surveys suggesting around 200–400 billion. The number depends on how many faint <a href="https://en.wikipedia.org/wiki/Red_dwarf" target="_blank" rel="noopener">red dwarf</a> stars are included, which make up roughly 70% of all stars.'}
+        info={'The <a href="https://en.wikipedia.org/wiki/Milky_Way" target="_blank" rel="noopener">Milky Way</a> is a barred spiral galaxy with an estimated diameter of 100,000 light-years. Estimates of its total star count range from 100 to 400 billion. The ESA\'s <a href="https://en.wikipedia.org/wiki/Gaia_(spacecraft)" target="_blank" rel="noopener">Gaia mission</a> has mapped over 2 billion stars (up from 2 million in the 1990s), but the exact total remains uncertain because faint <a href="https://en.wikipedia.org/wiki/Red_dwarf" target="_blank" rel="noopener">red dwarfs</a> — roughly 70% of all stars — are hard to detect at large distances. Most current estimates center around 100–200 billion.'}
       />
 
       <ParameterSlider
@@ -432,7 +432,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="What percentage of stars have planets on average?"
-        info={'Data from the <a href="https://en.wikipedia.org/wiki/Kepler_space_telescope" target="_blank" rel="noopener">Kepler space telescope</a> suggests that virtually every star in the galaxy has at least one planet. Studies indicate that <strong>planets are the rule rather than the exception</strong>. Current estimates suggest at least 80–100% of stars host planetary systems. See <a href="https://en.wikipedia.org/wiki/Exoplanet" target="_blank" rel="noopener">Exoplanet</a> for more.'}
+        info={'Data from the <a href="https://en.wikipedia.org/wiki/Kepler_space_telescope" target="_blank" rel="noopener">Kepler</a> and <a href="https://en.wikipedia.org/wiki/Transiting_Exoplanet_Survey_Satellite" target="_blank" rel="noopener">TESS</a> missions confirms that <strong>planets are the rule rather than the exception</strong>. Statistical analyses of Kepler data show at least one planet per star on average, meaning there are likely more planets than stars in the Milky Way. Current estimates suggest 80–100% of stars host planetary systems. TESS has identified over 7,800 candidate exoplanets as of 2026, reinforcing these findings.'}
       />
 
       <ParameterSlider
@@ -448,7 +448,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="What percentage of all star systems are third-generation? Our Solar System is a third-generation star system, which is considered a prerequisite for life."
-        info={'Stars are classified into <a href="https://en.wikipedia.org/wiki/Stellar_population" target="_blank" rel="noopener">stellar populations</a>. <strong>Population I</strong> (third-generation) stars are metal-rich, meaning they contain heavy elements forged in earlier generations of supernovae. These heavy elements (carbon, oxygen, iron, silicon) are essential for forming rocky planets and the chemistry of life. Our Sun is a Population I star. Earlier generations lacked sufficient heavy elements for complex chemistry.'}
+        info={'Stars are classified into <a href="https://en.wikipedia.org/wiki/Stellar_population" target="_blank" rel="noopener">stellar populations</a>. <strong>Population I</strong> (third-generation) stars are metal-rich, meaning they contain heavy elements forged in earlier generations of supernovae. These heavy elements (carbon, oxygen, iron, silicon) are essential for forming rocky planets and the chemistry of life. Our Sun is a Population I star. Population I stars dominate the Milky Way\'s <strong>thin disk</strong>, which contains the majority of the galaxy\'s stellar mass (60–80%). The oldest Population I stars are up to 10 billion years old. The galactic halo and bulge host older, metal-poor Population II stars.'}
       />
 
       <div class="section-result">
@@ -466,7 +466,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="The habitable zone is the optimal distance from a star where it is neither too hot nor too cold. In our Solar System, Earth and Mars fall within this zone. What fraction of planets are in the habitable zone?"
-        info={'The <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank" rel="noopener">circumstellar habitable zone</a> (also called the "Goldilocks zone") is the range of orbits around a star where liquid water could exist on a planet\'s surface. The width of this zone depends on the star\'s luminosity and type. For Sun-like stars, it extends roughly from 0.95 to 1.67 AU. Red dwarfs have much narrower habitable zones, while more luminous stars have wider ones.'}
+        info={'The <a href="https://en.wikipedia.org/wiki/Circumstellar_habitable_zone" target="_blank" rel="noopener">circumstellar habitable zone</a> (also called the "Goldilocks zone") is the range of orbits around a star where liquid water could exist on a planet\'s surface. For Sun-like stars, it extends roughly from 0.95 to 1.67 AU. Kepler data suggests <strong>0.37–0.88 rocky planets per Sun-like star</strong> orbit within the habitable zone (<a href="https://en.wikipedia.org/wiki/Earth_analog#Prevalence" target="_blank" rel="noopener">η⊕</a>). Red dwarfs have much narrower habitable zones, and planets there may be tidally locked or stripped of atmospheres by stellar flares.'}
       />
 
       <ParameterSlider
@@ -474,7 +474,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="Water is a prerequisite for life as we know it. What fraction of habitable planets have enough water to sustain life?"
-        info={'<a href="https://en.wikipedia.org/wiki/Water" target="_blank" rel="noopener">Water</a> is considered essential because it is an excellent solvent, remains liquid over a wide temperature range, and facilitates complex chemistry. Water is actually quite common in the universe — it has been detected on <a href="https://en.wikipedia.org/wiki/Extraterrestrial_liquid_water" target="_blank" rel="noopener">Mars, Europa, Enceladus</a>, and in many exoplanet atmospheres. The key question is whether enough liquid surface water exists for sustained biochemistry.'}
+        info={'<a href="https://en.wikipedia.org/wiki/Water" target="_blank" rel="noopener">Water</a> is considered essential because it is an excellent solvent, remains liquid over a wide temperature range, and facilitates complex chemistry. Water is abundant in the universe — detected on <a href="https://en.wikipedia.org/wiki/Extraterrestrial_liquid_water" target="_blank" rel="noopener">Mars, Europa, Enceladus</a>, and in many exoplanet atmospheres. A 2024 study modelling 28 rocky exoplanets found several (including Proxima Centauri b and TRAPPIST-1 e) may have extended liquid water reservoirs. However, <strong>too much</strong> water creates ocean worlds that may lack the land-ocean balance needed for life\'s chemical cycles.'}
       />
 
       <ParameterSlider
@@ -482,7 +482,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="A large planet like Jupiter sweeps up meteorites and protects inner planets. What fraction of star systems have such a guardian planet?"
-        info={'The <a href="https://en.wikipedia.org/wiki/Jupiter" target="_blank" rel="noopener">Jupiter</a> shield hypothesis suggests that gas giants protect inner rocky planets by gravitationally deflecting or capturing incoming comets and asteroids, reducing the frequency of catastrophic impacts. While some studies challenge this idea (Jupiter may also <em>redirect</em> objects inward), the presence of a massive outer planet is generally thought to moderate the bombardment rate, giving life more time to evolve. See <a href="https://en.wikipedia.org/wiki/Rare_Earth_hypothesis" target="_blank" rel="noopener">Rare Earth hypothesis</a>.'}
+        info={'The <a href="https://en.wikipedia.org/wiki/Jupiter" target="_blank" rel="noopener">Jupiter</a> shield hypothesis suggests gas giants protect inner planets by deflecting comets and asteroids. However, <strong>recent simulations have largely debunked this idea</strong> — Kevin Grazier\'s work shows Jupiter is "just as likely to send comets at Earth as deflect them away," acting as both shield and sniper. Jupiter may have been more important for <em>delivering</em> volatiles needed for life. Observationally, gas giants like Jupiter are found around only <strong>~10–20% of Sun-like stars</strong> (higher for metal-rich stars at ~28%). See <a href="https://en.wikipedia.org/wiki/Rare_Earth_hypothesis" target="_blank" rel="noopener">Rare Earth hypothesis</a>.'}
       />
 
       <ParameterSlider
@@ -490,7 +490,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="A metallic core and the magnetic field it generates protect against space radiation. What fraction of planets have a metallic core? (Heavy metals are common in third-generation star systems.)"
-        info={'A planet\'s <a href="https://en.wikipedia.org/wiki/Planetary_core" target="_blank" rel="noopener">metallic core</a> generates a <a href="https://en.wikipedia.org/wiki/Magnetosphere" target="_blank" rel="noopener">magnetosphere</a> through the dynamo effect. This magnetic field shields the surface from harmful <a href="https://en.wikipedia.org/wiki/Solar_wind" target="_blank" rel="noopener">solar wind</a> and <a href="https://en.wikipedia.org/wiki/Cosmic_ray" target="_blank" rel="noopener">cosmic radiation</a>, and prevents the atmosphere from being stripped away. Mars, for example, lost most of its atmosphere after its core cooled and its magnetic field collapsed. Earth\'s iron-nickel core remains active, maintaining our protective magnetosphere.'}
+        info={'A planet\'s <a href="https://en.wikipedia.org/wiki/Planetary_core" target="_blank" rel="noopener">metallic core</a> generates a <a href="https://en.wikipedia.org/wiki/Magnetosphere" target="_blank" rel="noopener">magnetosphere</a> through the dynamo effect. This shields the surface from <a href="https://en.wikipedia.org/wiki/Solar_wind" target="_blank" rel="noopener">solar wind</a> and <a href="https://en.wikipedia.org/wiki/Cosmic_ray" target="_blank" rel="noopener">cosmic radiation</a>, and prevents atmospheric stripping. All four terrestrial planets in our Solar System have iron cores, suggesting iron core formation is common in rocky planets. However, <strong>maintaining an active dynamo</strong> requires a liquid, convecting core — Mars lost its magnetic field when its core cooled. The longest-lived fields occur on massive planets with intermediate iron content.'}
       />
 
       <ParameterSlider
@@ -506,7 +506,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={1} max={100} step={1}
         unit="%"
         label="Is there a chemical prerequisite, such as a specific mixture ('primordial soup'), for life to begin? Estimate what fraction of otherwise habitable planets meet this requirement."
-        info={'The <a href="https://en.wikipedia.org/wiki/Primordial_soup" target="_blank" rel="noopener">primordial soup</a> hypothesis proposes that life arose from a mixture of organic molecules in early Earth\'s oceans, energized by lightning, UV radiation, or hydrothermal vents. The famous <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Urey_experiment" target="_blank" rel="noopener">Miller–Urey experiment</a> (1952) demonstrated that amino acids can form spontaneously under early Earth-like conditions. Other theories include the <a href="https://en.wikipedia.org/wiki/RNA_world" target="_blank" rel="noopener">RNA world hypothesis</a> and <a href="https://en.wikipedia.org/wiki/Hydrothermal_vent#Origin_of_life" target="_blank" rel="noopener">deep-sea hydrothermal vent</a> origins.'}
+        info={'The <a href="https://en.wikipedia.org/wiki/Primordial_soup" target="_blank" rel="noopener">primordial soup</a> hypothesis proposes that life arose from a mixture of organic molecules in early Earth\'s oceans, energized by lightning, UV radiation, or hydrothermal vents. The <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Urey_experiment" target="_blank" rel="noopener">Miller–Urey experiment</a> (1952) showed amino acids form spontaneously under early Earth-like conditions. A 2024 study by <a href="https://doi.org/10.1038/s41598-024-54700-x" target="_blank" rel="noopener">Stern &amp; Gerya</a> argues that <strong>plate tectonics</strong> and the right balance of continents and oceans are essential — and that only 0.003–0.2% of habitable planets may meet these geological requirements, potentially explaining the Fermi paradox.'}
       />
 
       <ParameterSlider
@@ -532,23 +532,23 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         min={0.5} max={13} step={0.1}
         unit="bn yr"
         label="What is the maximum age of third-generation star systems? (The Milky Way is about 13 billion years old.)"
-        info={'The <a href="https://en.wikipedia.org/wiki/Age_of_the_universe" target="_blank" rel="noopener">universe is about 13.8 billion years old</a>. Third-generation (Population I) stars like our Sun began forming roughly 8–10 billion years ago, after earlier stellar generations had enriched the interstellar medium with heavy elements through <a href="https://en.wikipedia.org/wiki/Supernova" target="_blank" rel="noopener">supernovae</a>. Our Sun itself is about <a href="https://en.wikipedia.org/wiki/Sun" target="_blank" rel="noopener">4.6 billion years old</a>, meaning some third-generation systems could be billions of years older than ours.'}
+        info={'The <a href="https://en.wikipedia.org/wiki/Age_of_the_universe" target="_blank" rel="noopener">universe is about 13.8 billion years old</a>. Third-generation (Population I) stars like our Sun began forming after earlier stellar generations enriched the interstellar medium with heavy elements through <a href="https://en.wikipedia.org/wiki/Supernova" target="_blank" rel="noopener">supernovae</a>. <strong>The oldest Population I stars are up to 10 billion years old</strong>, while our Sun is about <a href="https://en.wikipedia.org/wiki/Sun" target="_blank" rel="noopener">4.6 billion years old</a>. Some metal-rich stars in the galactic bulge formed over 10 billion years ago in regions where rapid star formation quickly enriched the gas with heavy elements.'}
       />
 
       <ParameterSlider
         bind:value={timeForLifeToAppear}
         min={0.1} max={13} step={0.1}
         unit="bn yr"
-        label="How long does it take for life to appear after a planet forms? (On Earth, a few billion years.)"
-        info={'On Earth, the <a href="https://en.wikipedia.org/wiki/Earliest_known_life_forms" target="_blank" rel="noopener">earliest evidence of life</a> dates to about 3.5–4.1 billion years ago, roughly 500 million to 1 billion years after the planet formed. This includes <a href="https://en.wikipedia.org/wiki/Stromatolite" target="_blank" rel="noopener">stromatolites</a> and chemical signatures in ancient rocks. The relatively rapid emergence of life on Earth suggests that abiogenesis may occur fairly quickly once conditions are suitable.'}
+        label="How long does it take for life to appear after a planet forms? (On Earth, roughly 0.5–1 billion years.)"
+        info={'On Earth, the <a href="https://en.wikipedia.org/wiki/Earliest_known_life_forms" target="_blank" rel="noopener">earliest evidence of life</a> dates to about 3.5–4.1 billion years ago, roughly <strong>500 million to 1 billion years</strong> after the planet formed. Recent research (Kipping 2025) places the <a href="https://en.wikipedia.org/wiki/Last_universal_common_ancestor" target="_blank" rel="noopener">Last Universal Common Ancestor (LUCA)</a> at 4.2 billion years ago — only ~350 million years after Earth formed. Bayesian analysis provides "formally strong evidence that life rapidly emerges in Earth-like conditions," though such conditions may themselves be rare.'}
       />
 
       <ParameterSlider
         bind:value={timeToIntelligentLife}
         min={0.1} max={13} step={0.1}
         unit="bn yr"
-        label="How long does it take from primitive life to intelligent life? (On Earth, from single-celled organisms to primates.)"
-        info={'On Earth, the journey from the <a href="https://en.wikipedia.org/wiki/Prokaryote" target="_blank" rel="noopener">first single-celled organisms</a> (~3.8 billion years ago) to <a href="https://en.wikipedia.org/wiki/Evolution_of_human_intelligence" target="_blank" rel="noopener">intelligent primates</a> took roughly 3.5 billion years. Key milestones include the <a href="https://en.wikipedia.org/wiki/Eukaryote" target="_blank" rel="noopener">evolution of eukaryotes</a> (~2 bya), <a href="https://en.wikipedia.org/wiki/Multicellular_organism" target="_blank" rel="noopener">multicellular life</a> (~600 mya), and the <a href="https://en.wikipedia.org/wiki/Cambrian_explosion" target="_blank" rel="noopener">Cambrian explosion</a> (~540 mya). Whether intelligence is an inevitable outcome of evolution or a rare accident is debated.'}
+        label="How long does it take from primitive life to intelligent life? (On Earth, about 3.5 billion years — from single-celled organisms to primates.)"
+        info={'On Earth, the journey from the <a href="https://en.wikipedia.org/wiki/Prokaryote" target="_blank" rel="noopener">first single-celled organisms</a> (~3.8 billion years ago) to <a href="https://en.wikipedia.org/wiki/Evolution_of_human_intelligence" target="_blank" rel="noopener">intelligent primates</a> took roughly <strong>3.5 billion years</strong>. Key milestones: <a href="https://en.wikipedia.org/wiki/Eukaryote" target="_blank" rel="noopener">eukaryotes</a> (~2 bya), <a href="https://en.wikipedia.org/wiki/Multicellular_organism" target="_blank" rel="noopener">multicellular life</a> (~600 mya), the <a href="https://en.wikipedia.org/wiki/Cambrian_explosion" target="_blank" rel="noopener">Cambrian explosion</a> (~540 mya). The prokaryote-to-eukaryote transition alone took over 1 billion years, suggesting it is a highly improbable step. Whether intelligence is an inevitable outcome of evolution or a rare accident remains debated.'}
       />
 
       <ParameterSlider
