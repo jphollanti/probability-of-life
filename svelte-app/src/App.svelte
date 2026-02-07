@@ -28,25 +28,54 @@
     survivalModel: 'gaussian',
   };
 
+  // === PERSISTENT STORAGE ===
+  const STORAGE_KEY = 'life-calculator-params';
+
+  function loadSaved() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {};
+  }
+
+  const saved = loadSaved();
+
+  function init(key) {
+    return saved[key] ?? DEFAULTS[key];
+  }
+
   // === STATE ===
-  let numberOfStars = $state(DEFAULTS.numberOfStars);
-  let ratioWithPlanets = $state(DEFAULTS.ratioWithPlanets);
-  let planetsPerStar = $state(DEFAULTS.planetsPerStar);
-  let ratioThirdGen = $state(DEFAULTS.ratioThirdGen);
-  let ratioHabitableZone = $state(DEFAULTS.ratioHabitableZone);
-  let ratioWithWater = $state(DEFAULTS.ratioWithWater);
-  let ratioGuardianPlanet = $state(DEFAULTS.ratioGuardianPlanet);
-  let ratioIronCore = $state(DEFAULTS.ratioIronCore);
-  let ratioSufficientMass = $state(DEFAULTS.ratioSufficientMass);
-  let ratioChemicalPrerequisites = $state(DEFAULTS.ratioChemicalPrerequisites);
-  let ratioLifeBegins = $state(DEFAULTS.ratioLifeBegins);
-  let ageThirdGen = $state(DEFAULTS.ageThirdGen);
-  let timeForLifeToAppear = $state(DEFAULTS.timeForLifeToAppear);
-  let timeToIntelligentLife = $state(DEFAULTS.timeToIntelligentLife);
-  let timeToCivilization = $state(DEFAULTS.timeToCivilization);
-  let ratioCommunication = $state(DEFAULTS.ratioCommunication);
-  let civilizationSurvival = $state(DEFAULTS.civilizationSurvival);
-  let survivalModel = $state('gaussian');
+  let numberOfStars = $state(init('numberOfStars'));
+  let ratioWithPlanets = $state(init('ratioWithPlanets'));
+  let planetsPerStar = $state(init('planetsPerStar'));
+  let ratioThirdGen = $state(init('ratioThirdGen'));
+  let ratioHabitableZone = $state(init('ratioHabitableZone'));
+  let ratioWithWater = $state(init('ratioWithWater'));
+  let ratioGuardianPlanet = $state(init('ratioGuardianPlanet'));
+  let ratioIronCore = $state(init('ratioIronCore'));
+  let ratioSufficientMass = $state(init('ratioSufficientMass'));
+  let ratioChemicalPrerequisites = $state(init('ratioChemicalPrerequisites'));
+  let ratioLifeBegins = $state(init('ratioLifeBegins'));
+  let ageThirdGen = $state(init('ageThirdGen'));
+  let timeForLifeToAppear = $state(init('timeForLifeToAppear'));
+  let timeToIntelligentLife = $state(init('timeToIntelligentLife'));
+  let timeToCivilization = $state(init('timeToCivilization'));
+  let ratioCommunication = $state(init('ratioCommunication'));
+  let civilizationSurvival = $state(init('civilizationSurvival'));
+  let survivalModel = $state(init('survivalModel'));
+
+  // Save all parameters to localStorage whenever any value changes
+  $effect(() => {
+    const params = {
+      numberOfStars, ratioWithPlanets, planetsPerStar, ratioThirdGen,
+      ratioHabitableZone, ratioWithWater, ratioGuardianPlanet, ratioIronCore,
+      ratioSufficientMass, ratioChemicalPrerequisites, ratioLifeBegins,
+      ageThirdGen, timeForLifeToAppear, timeToIntelligentLife, timeToCivilization,
+      ratioCommunication, civilizationSurvival, survivalModel,
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(params)); } catch {}
+  });
 
   // === DERIVED CALCULATIONS ===
 
@@ -291,6 +320,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     ratioCommunication = DEFAULTS.ratioCommunication;
     civilizationSurvival = DEFAULTS.civilizationSurvival;
     survivalModel = DEFAULTS.survivalModel;
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }
 </script>
 
