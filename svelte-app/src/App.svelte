@@ -212,6 +212,65 @@
     };
   });
 
+  // Easter egg: exactly one civilization
+  let isExactlyOne = $derived(
+    currentCivilizations >= 0.95 && currentCivilizations < 1.05
+  );
+
+  function openTshirtDesign() {
+    const params = [
+      ['Stars in the Milky Way', `${numberOfStars} billion`],
+      ['Stars with planets', `${ratioWithPlanets}%`],
+      ['Planets per star', `${planetsPerStar}`],
+      ['Third-generation stars', `${ratioThirdGen}%`],
+      ['In habitable zone', `${ratioHabitableZone}%`],
+      ['With water', `${ratioWithWater}%`],
+      ['Guardian planet', `${ratioGuardianPlanet}%`],
+      ['Iron core / magnetosphere', `${ratioIronCore}%`],
+      ['Sufficient mass', `${ratioSufficientMass}%`],
+      ['Chemical prerequisites', `${ratioChemicalPrerequisites}%`],
+      ['Life begins', `${ratioLifeBegins}%`],
+      ['Age of 3rd-gen stars', `${ageThirdGen} bn yr`],
+      ['Time for life to appear', `${timeForLifeToAppear} bn yr`],
+      ['Time to intelligent life', `${timeToIntelligentLife} bn yr`],
+      ['Time to civilization', `${timeToCivilization} bn yr`],
+      ['Detectable communication', `${ratioCommunication}%`],
+      ['Civilization survival', `${formatNumber(civilizationSurvival)} years`],
+      ['Survival model', survivalModel],
+    ];
+    const paramRows = params.map(([k, v]) =>
+      `<tr><td style="padding:3px 12px 3px 0;color:#aaa">${k}</td><td style="padding:3px 0;color:#ffd700">${v}</td></tr>`
+    ).join('');
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>There Is a God — T-Shirt</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a1a;color:#d0d0d0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+display:flex;justify-content:center;align-items:center;min-height:100vh;padding:2rem}
+.page{max-width:480px;text-align:center}
+.tshirt{background:#111;border:2px solid rgba(255,215,0,0.3);border-radius:16px;padding:2.5rem 2rem;margin-bottom:2rem;
+box-shadow:0 0 40px rgba(255,215,0,0.08)}
+h1{color:#ffd700;font-size:1.8rem;margin-bottom:0.5rem;text-shadow:0 0 20px rgba(255,215,0,0.3)}
+.sub{color:#aaa;font-size:0.9rem;margin-bottom:1.5rem;font-style:italic}
+table{margin:0 auto;font-size:0.78rem;text-align:left;border-collapse:collapse}
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(255,215,0,0.3),transparent);margin:1rem 0}
+.footer{font-size:0.75rem;color:#666}
+@media print{body{background:#fff;color:#000}.tshirt{border-color:#ccc;box-shadow:none}
+h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#666}}
+</style></head><body><div class="page">
+<div class="tshirt">
+<h1>There is a God!</h1>
+<p class="sub">I tuned the parameters of the Drake Equation<br>and found exactly one civilization.</p>
+<div class="divider"></div>
+<table>${paramRows}</table>
+</div>
+<p class="footer">Life Calculator &mdash; probability-of-life</p>
+<p style="margin-top:1rem;font-size:0.8rem;color:#888">Print this page (Ctrl+P) to save your t-shirt design</p>
+</div></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    window.open(URL.createObjectURL(blob), '_blank');
+  }
+
   // Reset to defaults
   function reset() {
     numberOfStars = DEFAULTS.numberOfStars;
@@ -549,7 +608,18 @@
           </div>
         {/if}
 
-        {#if currentCivilizations >= 1 && currentCivilizations < 2}
+        {#if isExactlyOne}
+          <div class="easter-egg">
+            <div class="easter-egg-title">Congratulations, you've discovered that there is a God!</div>
+            <p class="easter-egg-sub">
+              You've fine-tuned the parameters of the universe to produce exactly one civilization.
+              Clearly, this was by design.
+            </p>
+            <button class="tshirt-btn" onclick={openTshirtDesign}>
+              Order the T-Shirt
+            </button>
+          </div>
+        {:else if currentCivilizations >= 1 && currentCivilizations < 2}
           <div class="lonely-message hopeful">
             With your parameters, there may be only one civilization in the Milky Way — possibly us.
             There is still a {((1 - probZero(currentCivilizations) - currentCivilizations * Math.exp(-currentCivilizations)) * 100).toFixed(0)}% chance of 2 or more.
@@ -863,6 +933,49 @@
   .lonely-message.hopeful {
     color: var(--accent);
     background: rgba(74, 158, 255, 0.05);
+  }
+
+  .easter-egg {
+    text-align: center;
+    padding: 1.25rem 1rem;
+    border-radius: 10px;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    margin-top: 0.5rem;
+  }
+
+  .easter-egg-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+    margin-bottom: 0.5rem;
+  }
+
+  .easter-egg-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .tshirt-btn {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 8px;
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--gold);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tshirt-btn:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
   }
 
   /* Footer */
