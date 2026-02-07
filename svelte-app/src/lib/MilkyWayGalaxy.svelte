@@ -13,10 +13,18 @@
 
   // Galaxy parameters
   const TOTAL_STARS = 600;
-  const SPIRAL_ARMS = 2;
   const TILT = 0.35;
   const BASE_ROTATION_SPEED = 0.00008;
   const TARGET_FRAME_MS = 33; // ~30fps – saves battery on mobile
+
+  // Spiral arm configuration: 2 bright main arms + 2 fainter secondary arms
+  const ARMS = [
+    { offset: 0,              brightMul: 1.0, weight: 1.0, spreadMul: 1.0 },
+    { offset: Math.PI,        brightMul: 1.0, weight: 1.0, spreadMul: 1.0 },
+    { offset: Math.PI * 0.52, brightMul: 0.55, weight: 0.45, spreadMul: 1.3 },
+    { offset: Math.PI * 1.52, brightMul: 0.55, weight: 0.45, spreadMul: 1.3 },
+  ];
+  const ARM_TOTAL_WEIGHT = ARMS.reduce((s, a) => s + a.weight, 0);
 
   let stars = $state([]);
   let civilizationStars = $state([]);
@@ -30,8 +38,8 @@
   let bgH = 0;
 
   function createCivSprite(isSun) {
-    const glowRadius = isSun ? 6 : 5;
-    const coreSize = isSun ? 1.5 : 1.2;
+    const glowRadius = isSun ? 4 : 3;
+    const coreSize = isSun ? 1.0 : 0.7;
     const dim = Math.ceil((glowRadius + 2) * 2);
     const c = document.createElement('canvas');
     c.width = dim;
@@ -78,14 +86,53 @@
     const cy = h / 2;
 
     // Center glow
-    const cg = b.createRadialGradient(cx, cy, 0, cx, cy, w * 0.08);
-    cg.addColorStop(0, 'rgba(255, 240, 200, 0.12)');
-    cg.addColorStop(0.5, 'rgba(200, 180, 150, 0.04)');
+    const cg = b.createRadialGradient(cx, cy, 0, cx, cy, w * 0.1);
+    cg.addColorStop(0, 'rgba(255, 240, 200, 0.14)');
+    cg.addColorStop(0.4, 'rgba(220, 200, 160, 0.06)');
     cg.addColorStop(1, 'rgba(100, 100, 150, 0)');
     b.beginPath();
-    b.arc(cx, cy, w * 0.08, 0, Math.PI * 2);
+    b.arc(cx, cy, w * 0.1, 0, Math.PI * 2);
     b.fillStyle = cg;
     b.fill();
+
+    // Central bar (barred spiral galaxy)
+    b.save();
+    b.translate(cx, cy);
+    b.scale(1, TILT);      // compress for galaxy tilt
+    b.rotate(0.45);        // bar angle within galaxy plane
+
+    const barLen = w * 0.13;
+    const barThick = barLen * 0.24;
+
+    // Soft outer glow of the bar
+    b.globalAlpha = 0.055;
+    b.beginPath();
+    b.ellipse(0, 0, barLen * 1.5, barThick * 2.8, 0, 0, Math.PI * 2);
+    b.fillStyle = 'rgba(255, 225, 160, 1)';
+    b.fill();
+
+    // Core bar with gradient fading at the ends
+    b.globalAlpha = 0.1;
+    const barGrad = b.createLinearGradient(-barLen, 0, barLen, 0);
+    barGrad.addColorStop(0, 'rgba(255, 220, 150, 0)');
+    barGrad.addColorStop(0.15, 'rgba(255, 235, 180, 1)');
+    barGrad.addColorStop(0.5, 'rgba(255, 245, 210, 1)');
+    barGrad.addColorStop(0.85, 'rgba(255, 235, 180, 1)');
+    barGrad.addColorStop(1, 'rgba(255, 220, 150, 0)');
+    b.beginPath();
+    b.ellipse(0, 0, barLen, barThick, 0, 0, Math.PI * 2);
+    b.fillStyle = barGrad;
+    b.fill();
+
+    // Bright core nucleus
+    b.globalAlpha = 0.08;
+    b.beginPath();
+    b.ellipse(0, 0, barThick * 1.2, barThick * 1.2, 0, 0, Math.PI * 2);
+    b.fillStyle = 'rgba(255, 245, 220, 1)';
+    b.fill();
+
+    b.restore();
+    b.globalAlpha = 1;
 
     // Dust band
     b.globalAlpha = 0.025;
@@ -105,15 +152,24 @@
     bgH = h;
   }
 
+  function pickArm() {
+    let r = Math.random() * ARM_TOTAL_WEIGHT;
+    for (const arm of ARMS) {
+      r -= arm.weight;
+      if (r <= 0) return arm;
+    }
+    return ARMS[ARMS.length - 1];
+  }
+
   function generateStars() {
     const result = [];
     for (let i = 0; i < TOTAL_STARS; i++) {
-      const arm = i % SPIRAL_ARMS;
-      const armOffset = (arm / SPIRAL_ARMS) * Math.PI * 2;
+      const arm = pickArm();
+      const armOffset = arm.offset;
       const t = Math.random();
       const r = 0.05 + Math.sqrt(t) * 0.9;
       const spiralAngle = r * 3.5 + armOffset;
-      const spread = (1 - r * 0.5) * 0.6;
+      const spread = (1 - r * 0.5) * 0.6 * arm.spreadMul;
       const angle = spiralAngle + (Math.random() - 0.5) * spread;
       const isBulge = Math.random() < 0.15;
       const finalR = isBulge ? Math.random() * 0.2 : r;
@@ -124,7 +180,7 @@
                  : sizeFactor < 0.95 ? 1.0 + Math.random() * 0.8
                  : 1.8 + Math.random() * 1.0;
 
-      const brightness = 0.3 + Math.random() * 0.7;
+      const brightness = (0.3 + Math.random() * 0.7) * arm.brightMul;
 
       const colorTemp = Math.random();
       let r_c, g_c, b_c;
