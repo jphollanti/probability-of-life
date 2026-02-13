@@ -582,10 +582,11 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
 
       <ParameterSlider
         bind:value={civilizationSurvival}
-        min={100} max={10_000_000_000} step={100}
+        min={1} max={10_000_000_000}
         unit="years"
         label="How many years do civilizations survive on average?"
         logScale={true}
+        adaptiveStep={true}
         info={'This is one of the most uncertain parameters in estimating galactic civilizations. Estimates range from a few hundred years (if technological civilizations tend to self-destruct through nuclear war, climate change, or AI) to millions or billions of years (if some manage to achieve long-term stability). See <a href="https://en.wikipedia.org/wiki/Global_catastrophic_risk" target="_blank" rel="noopener">global catastrophic risk</a> and the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a> for more context.'}
       />
 
