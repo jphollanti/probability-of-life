@@ -25,7 +25,8 @@
   function onSliderInput(e) {
     const raw = parseFloat(e.target.value);
     if (logScale) {
-      value = Math.round(Math.pow(10, raw));
+      const rawValue = Math.pow(10, raw);
+      value = Math.round(rawValue / step) * step;
     } else {
       value = parseFloat((Math.round(raw / step) * step).toFixed(10));
     }
@@ -73,7 +74,7 @@
         onchange={onNumberInput}
         {min}
         {max}
-        {step}
+        step={logScale ? 'any' : step}
         class="number-input"
       />
       {#if unit}

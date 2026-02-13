@@ -582,7 +582,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
 
       <ParameterSlider
         bind:value={civilizationSurvival}
-        min={100} max={10_000_000_000} step={1}
+        min={100} max={10_000_000_000} step={100}
         unit="years"
         label="How many years do civilizations survive on average?"
         logScale={true}
