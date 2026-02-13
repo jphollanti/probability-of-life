@@ -9,6 +9,7 @@
     logScale = false,
     adaptiveStep = false,
     info = '',
+    scaleUnit = false,
   } = $props();
 
   let showInfo = $state(false);
@@ -22,6 +23,23 @@
   );
 
   let isValid = $derived(value >= min && value <= max);
+
+  // Scale factor for large-unit display (thousand, million, billion)
+  let scaleFactor = $derived(
+    scaleUnit && Math.abs(value) >= 1_000_000_000 ? 1_000_000_000 :
+    scaleUnit && Math.abs(value) >= 1_000_000 ? 1_000_000 :
+    scaleUnit && Math.abs(value) >= 1_000 ? 1_000 :
+    1
+  );
+  let scaleLabel = $derived(
+    scaleFactor === 1_000_000_000 ? 'billion ' + unit :
+    scaleFactor === 1_000_000 ? 'million ' + unit :
+    scaleFactor === 1_000 ? 'thousand ' + unit :
+    unit
+  );
+  let displayValue = $derived(value / scaleFactor);
+  let displayMin = $derived(min / scaleFactor);
+  let displayMax = $derived(max / scaleFactor);
 
   function adaptiveRound(rawValue) {
     if (rawValue < 1) return Math.max(min, 1);
@@ -48,7 +66,7 @@
   function onNumberInput(e) {
     const v = parseFloat(e.target.value);
     if (!isNaN(v)) {
-      value = v;
+      value = Math.round(v * scaleFactor);
     }
   }
 
@@ -83,15 +101,15 @@
     <div class="value-group">
       <input
         type="number"
-        value={value}
+        value={displayValue}
         onchange={onNumberInput}
-        {min}
-        {max}
+        min={displayMin}
+        max={displayMax}
         step={logScale ? 'any' : step}
         class="number-input"
       />
-      {#if unit}
-        <span class="unit">{unit}</span>
+      {#if unit || scaleLabel}
+        <span class="unit">{scaleLabel}</span>
       {/if}
     </div>
   </div>
