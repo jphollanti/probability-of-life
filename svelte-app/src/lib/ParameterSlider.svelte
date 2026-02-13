@@ -7,6 +7,7 @@
     unit = '',
     label = '',
     logScale = false,
+    adaptiveStep = false,
     info = '',
   } = $props();
 
@@ -22,11 +23,23 @@
 
   let isValid = $derived(value >= min && value <= max);
 
+  function adaptiveRound(rawValue) {
+    if (rawValue < 1) return Math.max(min, 1);
+    if (rawValue < 10) return Math.round(rawValue);
+    const exponent = Math.floor(Math.log10(rawValue));
+    const magnitude = Math.pow(10, exponent);
+    return Math.round(rawValue / magnitude) * magnitude;
+  }
+
   function onSliderInput(e) {
     const raw = parseFloat(e.target.value);
     if (logScale) {
       const rawValue = Math.pow(10, raw);
-      value = Math.round(rawValue / step) * step;
+      if (adaptiveStep) {
+        value = Math.min(max, Math.max(min, adaptiveRound(rawValue)));
+      } else {
+        value = Math.round(rawValue / step) * step;
+      }
     } else {
       value = parseFloat((Math.round(raw / step) * step).toFixed(10));
     }
