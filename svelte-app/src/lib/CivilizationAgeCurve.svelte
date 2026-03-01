@@ -1,9 +1,13 @@
 <script>
+  import { getSurvivalProbability } from './survivalMath.js';
+  import { formatNumber } from './formatNumber.js';
+
   let {
     meanSurvival = 100_000,
     model = $bindable('gaussian'),
     effectiveMean = null,
     earthAge = null,
+    civilizationCount = 0,
   } = $props();
 
   // --- Distribution functions (return PDF value at x) ---
@@ -221,7 +225,10 @@
     const prob = pdf(age);
     // Map probability to SVG y
     const svgY = PADDING.top + PLOT_H - (prob / yMax) * PLOT_H;
-    return { age, prob, svgX: mouseX, svgY };
+    // Number of civilizations surviving to at least this age
+    const survivalFrac = getSurvivalProbability(model, meanSurvival, age);
+    const civCount = civilizationCount * survivalFrac;
+    return { age, prob, svgX: mouseX, svgY, civCount };
   });
 </script>
 
@@ -411,7 +418,7 @@
         stroke="#fff"
         stroke-width="1.5"
       />
-      <!-- Tooltip background + text -->
+      <!-- Tooltip text -->
       {@const tooltipLeft = hoverInfo.svgX > PADDING.left + PLOT_W / 2}
       {@const tx = tooltipLeft ? hoverInfo.svgX - 8 : hoverInfo.svgX + 8}
       {@const anchor = tooltipLeft ? 'end' : 'start'}
@@ -424,7 +431,7 @@
         font-size="10"
         font-weight="600"
       >
-        {formatAxisValue(hoverInfo.age)} yr
+        {formatNumber(hoverInfo.civCount)} civs
       </text>
     {/if}
 
