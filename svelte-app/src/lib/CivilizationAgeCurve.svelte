@@ -3,6 +3,7 @@
     meanSurvival = 100_000,
     model = $bindable('gaussian'),
     effectiveMean = null,
+    earthAge = null,
   } = $props();
 
   // --- Distribution functions (return PDF value at x) ---
@@ -157,6 +158,16 @@
     return x;
   });
 
+  // Earth position marker
+  let earthMarker = $derived.by(() => {
+    if (earthAge == null || earthAge <= 0) return null;
+    const { xMin, xMax, yMax } = curveData;
+    if (earthAge < xMin || earthAge > xMax) return null;
+    const px = PADDING.left + ((earthAge - xMin) / (xMax - xMin)) * PLOT_W;
+    if (px < PADDING.left || px > PADDING.left + PLOT_W) return null;
+    return px;
+  });
+
   // --- X-axis ticks ---
 
   function formatAxisValue(val) {
@@ -266,6 +277,27 @@
         font-weight="600"
       >
         mean ({formatAxisValue(effectiveMean)})
+      </text>
+    {/if}
+
+    <!-- Earth position marker -->
+    {#if earthMarker !== null}
+      <line
+        x1={earthMarker} y1={PADDING.top}
+        x2={earthMarker} y2={PADDING.top + PLOT_H}
+        stroke="#4ade80"
+        stroke-width="1.5"
+        stroke-dasharray="4 3"
+      />
+      <text
+        x={earthMarker + 5}
+        y={PADDING.top + PLOT_H / 2}
+        text-anchor="start"
+        fill="#4ade80"
+        font-size="10"
+        font-weight="600"
+      >
+        Earth ({formatAxisValue(earthAge)})
       </text>
     {/if}
 
