@@ -6,7 +6,6 @@
     meanSurvival = 100_000,
     model = $bindable('gaussian'),
     effectiveMean = null,
-    earthAge = null,
     civilizationCount = 0,
   } = $props();
 
@@ -162,16 +161,6 @@
     return x;
   });
 
-  // Earth position marker
-  let earthMarker = $derived.by(() => {
-    if (earthAge == null || earthAge <= 0) return null;
-    const { xMin, xMax, yMax } = curveData;
-    if (earthAge < xMin || earthAge > xMax) return null;
-    const px = PADDING.left + ((earthAge - xMin) / (xMax - xMin)) * PLOT_W;
-    if (px < PADDING.left || px > PADDING.left + PLOT_W) return null;
-    return px;
-  });
-
   // --- X-axis ticks ---
 
   function formatAxisValue(val) {
@@ -241,6 +230,12 @@
       {/each}
     </select>
   </div>
+
+  <p class="chart-explainer">
+    This chart shows how long civilizations are likely to last.
+    The peak shows the most common lifespan. The dashed line marks the average.
+    Hover over the curve to see how many of your estimated civilizations would survive to at least that age.
+  </p>
 
   <p class="model-description">
     {currentModel.description}
@@ -326,27 +321,6 @@
         font-weight="600"
       >
         mean ({formatAxisValue(effectiveMean)})
-      </text>
-    {/if}
-
-    <!-- Earth position marker -->
-    {#if earthMarker !== null}
-      <line
-        x1={earthMarker} y1={PADDING.top}
-        x2={earthMarker} y2={PADDING.top + PLOT_H}
-        stroke="#4ade80"
-        stroke-width="1.5"
-        stroke-dasharray="4 3"
-      />
-      <text
-        x={earthMarker + 5}
-        y={PADDING.top + PLOT_H / 2}
-        text-anchor="start"
-        fill="#4ade80"
-        font-size="10"
-        font-weight="600"
-      >
-        Earth ({formatAxisValue(earthAge)})
       </text>
     {/if}
 
@@ -490,6 +464,13 @@
   select option {
     background: #1a1a2e;
     color: #fff;
+  }
+
+  .chart-explainer {
+    font-size: 0.85rem;
+    color: var(--text-muted, #aaa);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
   }
 
   .model-description {
