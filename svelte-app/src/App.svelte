@@ -620,7 +620,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         meanSurvival={civilizationSurvival}
         bind:model={survivalModel}
         effectiveMean={effectiveMeanLifetime}
-        earthAge={100}
+        civilizationCount={currentCivilizations}
       />
 
       {#if timeWarning}

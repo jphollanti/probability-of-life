@@ -1,9 +1,12 @@
 <script>
+  import { getSurvivalProbability } from './survivalMath.js';
+  import { formatNumber } from './formatNumber.js';
+
   let {
     meanSurvival = 100_000,
     model = $bindable('gaussian'),
     effectiveMean = null,
-    earthAge = null,
+    civilizationCount = 0,
   } = $props();
 
   // --- Distribution functions (return PDF value at x) ---
@@ -158,16 +161,6 @@
     return x;
   });
 
-  // Earth position marker
-  let earthMarker = $derived.by(() => {
-    if (earthAge == null || earthAge <= 0) return null;
-    const { xMin, xMax, yMax } = curveData;
-    if (earthAge < xMin || earthAge > xMax) return null;
-    const px = PADDING.left + ((earthAge - xMin) / (xMax - xMin)) * PLOT_W;
-    if (px < PADDING.left || px > PADDING.left + PLOT_W) return null;
-    return px;
-  });
-
   // --- X-axis ticks ---
 
   function formatAxisValue(val) {
@@ -221,7 +214,10 @@
     const prob = pdf(age);
     // Map probability to SVG y
     const svgY = PADDING.top + PLOT_H - (prob / yMax) * PLOT_H;
-    return { age, prob, svgX: mouseX, svgY };
+    // Number of civilizations surviving to at least this age
+    const survivalFrac = getSurvivalProbability(model, meanSurvival, age);
+    const civCount = civilizationCount * survivalFrac;
+    return { age, prob, svgX: mouseX, svgY, civCount };
   });
 </script>
 
@@ -234,6 +230,12 @@
       {/each}
     </select>
   </div>
+
+  <p class="chart-explainer">
+    This chart shows how long civilizations are likely to last.
+    The peak shows the most common lifespan. The dashed line marks the average.
+    Hover over the curve to see how many of your estimated civilizations would survive to at least that age.
+  </p>
 
   <p class="model-description">
     {currentModel.description}
@@ -322,27 +324,6 @@
       </text>
     {/if}
 
-    <!-- Earth position marker -->
-    {#if earthMarker !== null}
-      <line
-        x1={earthMarker} y1={PADDING.top}
-        x2={earthMarker} y2={PADDING.top + PLOT_H}
-        stroke="#4ade80"
-        stroke-width="1.5"
-        stroke-dasharray="4 3"
-      />
-      <text
-        x={earthMarker + 5}
-        y={PADDING.top + PLOT_H / 2}
-        text-anchor="start"
-        fill="#4ade80"
-        font-size="10"
-        font-weight="600"
-      >
-        Earth ({formatAxisValue(earthAge)})
-      </text>
-    {/if}
-
     <!-- X axis -->
     <line
       x1={PADDING.left} y1={PADDING.top + PLOT_H}
@@ -411,11 +392,12 @@
         stroke="#fff"
         stroke-width="1.5"
       />
-      <!-- Tooltip background + text -->
+      <!-- Tooltip text -->
       {@const tooltipLeft = hoverInfo.svgX > PADDING.left + PLOT_W / 2}
       {@const tx = tooltipLeft ? hoverInfo.svgX - 8 : hoverInfo.svgX + 8}
       {@const anchor = tooltipLeft ? 'end' : 'start'}
-      {@const ty = Math.max(PADDING.top + 14, Math.min(hoverInfo.svgY - 6, PADDING.top + PLOT_H - 20))}
+      {@const ty = Math.max(PADDING.top + 24, Math.min(hoverInfo.svgY - 16, PADDING.top + PLOT_H - 36))}
+      {@const pNorm = hoverInfo.prob / curveData.yMax}
       <text
         x={tx}
         y={ty}
@@ -424,7 +406,8 @@
         font-size="10"
         font-weight="600"
       >
-        {formatAxisValue(hoverInfo.age)} yr
+        <tspan x={tx} dy="0">{formatNumber(hoverInfo.civCount)} civs survive</tspan>
+        <tspan x={tx} dy="13">P = {(pNorm * 100).toFixed(1)}%</tspan>
       </text>
     {/if}
 
@@ -481,6 +464,13 @@
   select option {
     background: #1a1a2e;
     color: #fff;
+  }
+
+  .chart-explainer {
+    font-size: 0.85rem;
+    color: var(--text-muted, #aaa);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
   }
 
   .model-description {
