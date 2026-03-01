@@ -395,7 +395,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     </p>
 
     <div class="hero-civilization" bind:this={heroEl}>
-      <span class="hero-label">Civilizations in the Milky Way right now</span>
+      <span class="hero-label">Civilizations in your Milky Way right now</span>
       <span class="hero-value">{formatNumber(currentCivilizations, 1)}</span>
       {#if currentCivilizations > 0}
         <span class="hero-range">90% range: {formatRange(ci90.lower, ci90.upper)}</span>
@@ -669,7 +669,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         <div class="result-divider"></div>
 
         <div class="result-row highlight" bind:this={resultsEl}>
-          <span class="result-label">Civilizations in the Milky Way right now</span>
+          <span class="result-label">Civilizations in your Milky Way right now</span>
           <span class="result-value-stack">
             <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
             {#if currentCivilizations > 0}
@@ -769,7 +769,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
               With your parameters, there is a {(pZero * 100).toFixed(0)}% chance of zero
               simultaneous civilizations — we are most likely alone.
             {:else}
-              With your parameters, there are likely no simultaneous civilizations in the Milky Way
+              With your parameters, there are likely no simultaneous civilizations in your Milky Way
               — we are probably alone.
             {/if}
           </div>
@@ -788,7 +788,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
           </div>
         {:else if currentCivilizations >= 1 && currentCivilizations < 2}
           <div class="lonely-message hopeful">
-            With your parameters, there may be only one civilization in the Milky Way — possibly us.
+            With your parameters, there may be only one civilization in your Milky Way — possibly us.
             There is still a {((1 - probZero(currentCivilizations) - currentCivilizations * Math.exp(-currentCivilizations)) * 100).toFixed(0)}% chance of 2 or more.
           </div>
         {/if}
