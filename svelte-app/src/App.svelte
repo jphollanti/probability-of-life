@@ -4,7 +4,7 @@
   import MilkyWayGalaxy from './lib/MilkyWayGalaxy.svelte';
   import ResultDistribution from './lib/ResultDistribution.svelte';
   import { formatNumber, formatRange, formatCompact } from './lib/formatNumber.js';
-  import { getEffectiveMean, getDistributionStats, getConfidenceInterval, getModelInsight, probZero } from './lib/survivalMath.js';
+  import { getEffectiveMean, getDistributionStats, getConfidenceInterval, getModelInsight, probZero, getDetectableFraction, getFormationFraction, getParameterUncertaintyCI } from './lib/survivalMath.js';
 
   // === DEFAULT VALUES ===
   const DEFAULTS = {
@@ -27,6 +27,7 @@
     ratioCommunication: 50,
     civilizationSurvival: 100_000,
     survivalModel: 'gaussian',
+    civilizationsPerPlanet: 1,
   };
 
   // === PERSISTENT STORAGE ===
@@ -66,6 +67,7 @@
   let ratioCommunication = $state(init('ratioCommunication'));
   let civilizationSurvival = $state(init('civilizationSurvival'));
   let survivalModel = $state(init('survivalModel'));
+  let civilizationsPerPlanet = $state(init('civilizationsPerPlanet'));
 
   // Save all parameters to localStorage whenever any value changes
   $effect(() => {
@@ -75,6 +77,7 @@
       ratioSufficientMass, ratioChemicalPrerequisites, ratioLifeBegins,
       ageThirdGen, timeForLifeToAppear, timeToIntelligentLife, timeToCivilization,
       timeToDetectable, ratioCommunication, civilizationSurvival, survivalModel,
+      civilizationsPerPlanet,
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(params)); } catch {}
   });
@@ -113,11 +116,11 @@
     Math.max(0, ageThirdGen - timeForLifeToAppear)
   );
 
-  // Fraction of 3rd-gen planets old enough for life to have appeared
+  // Fraction of 3rd-gen planets old enough for life to have appeared.
+  // Uses declining exponential star formation rate (τ ≈ 3 Gyr) instead of
+  // uniform — more stars formed early, so a larger fraction are old enough.
   let fractionWithLife = $derived(
-    ageThirdGen > 0
-      ? Math.max(0, (ageThirdGen - timeForLifeToAppear) / ageThirdGen)
-      : 0
+    getFormationFraction(ageThirdGen, timeForLifeToAppear)
   );
 
   // Planets where life has appeared
@@ -125,9 +128,7 @@
 
   // Fraction old enough for intelligent life
   let fractionWithIntelligentLife = $derived(
-    ageThirdGen > 0
-      ? Math.max(0, (ageThirdGen - timeForLifeToAppear - timeToIntelligentLife) / ageThirdGen)
-      : 0
+    getFormationFraction(ageThirdGen, timeForLifeToAppear + timeToIntelligentLife)
   );
 
   let planetsWithIntelligentLife = $derived(
@@ -136,14 +137,14 @@
 
   // Fraction old enough for civilizations to have formed
   let fractionWithCivilizations = $derived(
-    ageThirdGen > 0
-      ? Math.max(0, (ageThirdGen - totalTimeRequired) / ageThirdGen)
-      : 0
+    getFormationFraction(ageThirdGen, totalTimeRequired)
   );
 
-  // Total civilizations that have ever emerged
+  // Total civilizations that have ever emerged.
+  // Multiplied by civilizationsPerPlanet to allow re-emergence cycles:
+  // a planet habitable for billions of years can produce multiple civilizations.
   let totalCivilizations = $derived(
-    fractionWithCivilizations * planetsCapableOfLife
+    fractionWithCivilizations * planetsCapableOfLife * civilizationsPerPlanet
   );
 
   // Time span during which civilizations could have evolved (years)
@@ -180,11 +181,21 @@
   // Probability of zero civilizations
   let pZero = $derived(probZero(currentCivilizations));
 
-  // Fraction of a civilization's lifetime during which it broadcasts detectable signals.
-  // A civilization must first develop for timeToDetectable years before it starts broadcasting.
+  // Parameter uncertainty: the Poisson CI only captures "given λ, what's
+  // the count?" — the much larger uncertainty is "what IS λ?"
+  // 13 multiplicative parameters, each uncertain by ~factor 2 (GSD = 2).
+  const NUM_UNCERTAIN_PARAMS = 13;
+  let paramUncertaintyCI = $derived(
+    getParameterUncertaintyCI(currentCivilizations, NUM_UNCERTAIN_PARAMS, 2.0)
+  );
+
+  // Fraction of currently-alive civilizations that are broadcasting.
+  // Uses the survival function integral ∫_{td}^∞ S(t) dt / ∫_0^∞ S(t) dt
+  // instead of the naive (mean - td) / mean ratio. This correctly accounts
+  // for civilizations that die before ever reaching the broadcasting phase.
   let detectableFraction = $derived(
     effectiveMeanLifetime > 0
-      ? Math.max(0, effectiveMeanLifetime - timeToDetectable) / effectiveMeanLifetime
+      ? getDetectableFraction(survivalModel, civilizationSurvival, timeToDetectable)
       : 0
   );
 
@@ -199,8 +210,11 @@
   });
 
   // Average distance between civilizations (light-years)
-  // Milky Way disk: ~100,000 ly diameter, ~1,000 ly thick
-  const MILKY_WAY_VOLUME_LY3 = Math.PI * 50_000 * 50_000 * 1_000;
+  // Galactic habitable zone (GHZ): ~4–10 kpc (13,000–33,000 ly) from center,
+  // ~1,000 ly thick.  Civilizations concentrate here where metallicity is
+  // high enough for rocky planets but radiation isn't too intense.
+  // This is ~37% of the full disk volume, making civilizations closer together.
+  const MILKY_WAY_VOLUME_LY3 = Math.PI * (33_000 * 33_000 - 13_000 * 13_000) * 1_000;
   let avgDistance = $derived(
     currentCivilizations > 1
       ? Math.cbrt(MILKY_WAY_VOLUME_LY3 / currentCivilizations)
@@ -324,6 +338,7 @@
       ['Time to detectable signals', `${formatNumber(timeToDetectable)} yr`],
       ['Detectable communication', `${ratioCommunication}%`],
       ['Civilization survival', `${formatNumber(civilizationSurvival)} years`],
+      ['Civilizations per planet', `${civilizationsPerPlanet}`],
       ['Survival model', survivalModel],
     ];
     const paramRows = params.map(([k, v]) =>
@@ -380,6 +395,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     ratioCommunication = DEFAULTS.ratioCommunication;
     civilizationSurvival = DEFAULTS.civilizationSurvival;
     survivalModel = DEFAULTS.survivalModel;
+    civilizationsPerPlanet = DEFAULTS.civilizationsPerPlanet;
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }
 </script>
@@ -398,7 +414,8 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
       <span class="hero-label">Civilizations in your Milky Way right now</span>
       <span class="hero-value">{formatNumber(currentCivilizations, 1)}</span>
       {#if currentCivilizations > 0}
-        <span class="hero-range">90% range: {formatRange(ci90.lower, ci90.upper)}</span>
+        <span class="hero-range">Poisson 90%: {formatRange(ci90.lower, ci90.upper)}</span>
+        <span class="hero-range uncertainty">Parameter uncertainty 90%: {formatRange(paramUncertaintyCI.lower, paramUncertaintyCI.upper)}</span>
       {/if}
     </div>
   </header>
@@ -591,6 +608,14 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         info={'This is one of the most uncertain parameters in estimating galactic civilizations. Estimates range from a few hundred years (if technological civilizations tend to self-destruct through nuclear war, climate change, or AI) to millions or billions of years (if some manage to achieve long-term stability). See <a href="https://en.wikipedia.org/wiki/Global_catastrophic_risk" target="_blank" rel="noopener">global catastrophic risk</a> and the <a href="https://en.wikipedia.org/wiki/Fermi_paradox" target="_blank" rel="noopener">Fermi paradox</a> for more context.'}
       />
 
+      <ParameterSlider
+        bind:value={civilizationsPerPlanet}
+        min={1} max={100} step={1}
+        unit=""
+        label="How many times can civilizations independently arise on the same planet? A planet habitable for billions of years could produce multiple civilizations in sequence."
+        info={'The standard Drake equation assumes at most one civilization per planet. But if civilizations are short-lived (say ~100,000 years) and a planet remains habitable for billions of years, there are millions of independent "windows" for life to restart and re-evolve. On Earth, mass extinctions have reset the clock repeatedly — mammals rose after dinosaurs were wiped out. If intelligence is a convergent outcome of evolution, a single planet might produce dozens of civilizations over its lifetime. Setting this above 1 models such <strong>re-emergence cycles</strong>.'}
+      />
+
       <CivilizationAgeCurve
         meanSurvival={civilizationSurvival}
         bind:model={survivalModel}
@@ -673,7 +698,8 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
           <span class="result-value-stack">
             <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
             {#if currentCivilizations > 0}
-              <span class="result-ci">90% range: {formatRange(ci90.lower, ci90.upper)}</span>
+              <span class="result-ci">Poisson 90%: {formatRange(ci90.lower, ci90.upper)}</span>
+              <span class="result-ci uncertainty-ci">Parameter uncertainty 90%: {formatRange(paramUncertaintyCI.lower, paramUncertaintyCI.upper)}</span>
             {/if}
           </span>
         </div>
@@ -685,6 +711,15 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
             {ci50}
             model={survivalModel}
           />
+        {/if}
+
+        {#if currentCivilizations > 0}
+          <div class="uncertainty-note">
+            The <strong>Poisson range</strong> reflects "given this birth rate, how many happen to be alive?" — statistical noise.
+            The <strong>parameter uncertainty range</strong> reflects "how uncertain are we about the birth rate itself?" —
+            each of the ~{NUM_UNCERTAIN_PARAMS} input parameters is uncertain by roughly a factor of 2, and these
+            compound multiplicatively. This is why the true uncertainty spans orders of magnitude.
+          </div>
         {/if}
 
         <div class="result-row highlight-secondary">
@@ -884,6 +919,12 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     margin-top: 0.35rem;
   }
 
+  .hero-range.uncertainty {
+    font-size: 0.78rem;
+    color: rgba(255, 152, 0, 0.7);
+    margin-top: 0.15rem;
+  }
+
   /* Floating header */
   .floating-header {
     position: fixed;
@@ -1065,6 +1106,26 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     color: var(--text-muted);
     font-weight: 400;
     margin-top: 0.15rem;
+  }
+
+  .result-ci.uncertainty-ci {
+    color: rgba(255, 152, 0, 0.7);
+    font-size: 0.72rem;
+  }
+
+  .uncertainty-note {
+    margin-top: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255, 152, 0, 0.05);
+    border-left: 3px solid rgba(255, 152, 0, 0.25);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .uncertainty-note strong {
+    color: #ccd;
   }
 
   .result-note {

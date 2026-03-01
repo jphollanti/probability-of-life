@@ -23,6 +23,11 @@
     return lambda * Math.exp(-lambda * x);
   }
 
+  function paretoPDF(x, xm, alpha) {
+    if (x < xm) return 0;
+    return alpha * Math.pow(xm, alpha) / Math.pow(x, alpha + 1);
+  }
+
   // --- Model configurations ---
 
   const MODELS = {
@@ -37,6 +42,10 @@
     exponential: {
       label: 'Exponential decay (Doomsday model)',
       description: 'Constant probability of destruction: dying young is most likely. The most pessimistic model.',
+    },
+    zipf: {
+      label: "Zipf's law / Pareto (power law)",
+      description: "Power-law lifetimes (α\u00A0=\u00A01.5): most civilizations die young, but rare survivors persist for extraordinarily long times. Infinite variance means extreme outliers dominate the galactic census. Mirrors patterns in city sizes, species lifetimes, and earthquake magnitudes.",
     },
   };
 
@@ -72,12 +81,19 @@
       const lnMean = Math.exp(muLog + sigmaLog * sigmaLog / 2);
       xMax = lnMean * 4;
       pdf = (x) => lognormalPDF(x, muLog, sigmaLog);
-    } else {
-      // exponential
+    } else if (model === 'exponential') {
       const lambda = 1 / mu;
       xMin = 0;
       xMax = mu * 5;
       pdf = (x) => exponentialPDF(x, lambda);
+    } else {
+      // zipf / Pareto
+      const alpha = 1.5;
+      const xm = mu / Math.pow(2, 1 / alpha);
+      xMin = 0;
+      const paretoMean = alpha * xm / (alpha - 1);
+      xMax = paretoMean * 5;
+      pdf = (x) => paretoPDF(x, xm, alpha);
     }
 
     // Generate points
