@@ -422,7 +422,8 @@
       {@const tooltipLeft = hoverInfo.svgX > PADDING.left + PLOT_W / 2}
       {@const tx = tooltipLeft ? hoverInfo.svgX - 8 : hoverInfo.svgX + 8}
       {@const anchor = tooltipLeft ? 'end' : 'start'}
-      {@const ty = Math.max(PADDING.top + 14, Math.min(hoverInfo.svgY - 6, PADDING.top + PLOT_H - 20))}
+      {@const ty = Math.max(PADDING.top + 24, Math.min(hoverInfo.svgY - 16, PADDING.top + PLOT_H - 36))}
+      {@const pNorm = hoverInfo.prob / curveData.yMax}
       <text
         x={tx}
         y={ty}
@@ -431,7 +432,8 @@
         font-size="10"
         font-weight="600"
       >
-        {formatNumber(hoverInfo.civCount)} civs
+        <tspan x={tx} dy="0">{formatNumber(hoverInfo.civCount)} civs survive</tspan>
+        <tspan x={tx} dy="13">P = {(pNorm * 100).toFixed(1)}%</tspan>
       </text>
     {/if}
 
