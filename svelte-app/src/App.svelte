@@ -395,7 +395,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
     </p>
 
     <div class="hero-civilization" bind:this={heroEl}>
-      <span class="hero-label">Civilizations in the Milky Way right now</span>
+      <span class="hero-label">Civilizations in your Milky Way right now</span>
       <span class="hero-value">{formatNumber(currentCivilizations, 1)}</span>
       {#if currentCivilizations > 0}
         <span class="hero-range">90% range: {formatRange(ci90.lower, ci90.upper)}</span>
@@ -669,7 +669,7 @@ h1{color:#b8860b;text-shadow:none}td{color:#333!important}.sub,.footer{color:#66
         <div class="result-divider"></div>
 
         <div class="result-row highlight" bind:this={resultsEl}>
-          <span class="result-label">Civilizations in the Milky Way right now</span>
+          <span class="result-label">Civilizations in your Milky Way right now</span>
           <span class="result-value-stack">
             <span class="result-value big">{formatNumber(currentCivilizations, 1)}</span>
             {#if currentCivilizations > 0}
