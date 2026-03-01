@@ -107,7 +107,7 @@
       points.push({ x, y });
     }
 
-    return { points, xMin, xMax, yMax };
+    return { points, xMin, xMax, yMax, pdf };
   });
 
   // --- SVG path from data ---
@@ -188,6 +188,41 @@
     }
     return ticks;
   });
+
+  // --- Mouse hover tracking ---
+
+  let svgEl = $state(null);
+  let mouseX = $state(null);
+
+  function handlePointerMove(e) {
+    if (!svgEl) return;
+    const rect = svgEl.getBoundingClientRect();
+    // Convert DOM coords to SVG viewBox coords
+    const scaleX = WIDTH / rect.width;
+    const svgX = (e.clientX - rect.left) * scaleX;
+    // Only track within the plot area
+    if (svgX >= PADDING.left && svgX <= PADDING.left + PLOT_W) {
+      mouseX = svgX;
+    } else {
+      mouseX = null;
+    }
+  }
+
+  function handlePointerLeave() {
+    mouseX = null;
+  }
+
+  let hoverInfo = $derived.by(() => {
+    if (mouseX == null) return null;
+    const { xMin, xMax, yMax, pdf } = curveData;
+    if (yMax === 0) return null;
+    // Map pixel to age value
+    const age = xMin + ((mouseX - PADDING.left) / PLOT_W) * (xMax - xMin);
+    const prob = pdf(age);
+    // Map probability to SVG y
+    const svgY = PADDING.top + PLOT_H - (prob / yMax) * PLOT_H;
+    return { age, prob, svgX: mouseX, svgY };
+  });
 </script>
 
 <div class="curve-container">
@@ -204,7 +239,14 @@
     {currentModel.description}
   </p>
 
-  <svg viewBox="0 0 {WIDTH} {HEIGHT}" class="chart">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <svg
+    bind:this={svgEl}
+    viewBox="0 0 {WIDTH} {HEIGHT}"
+    class="chart"
+    onpointermove={handlePointerMove}
+    onpointerleave={handlePointerLeave}
+  >
     <defs>
       <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="rgba(74, 158, 255, 0.4)" />
@@ -350,6 +392,48 @@
     >
       Probability
     </text>
+
+    <!-- Hover indicator -->
+    {#if hoverInfo}
+      <!-- Vertical guide line -->
+      <line
+        x1={hoverInfo.svgX} y1={PADDING.top}
+        x2={hoverInfo.svgX} y2={PADDING.top + PLOT_H}
+        stroke="rgba(255,255,255,0.25)"
+        stroke-width="1"
+      />
+      <!-- Dot on curve -->
+      <circle
+        cx={hoverInfo.svgX}
+        cy={hoverInfo.svgY}
+        r="4"
+        fill="#4a9eff"
+        stroke="#fff"
+        stroke-width="1.5"
+      />
+      <!-- Tooltip background + text -->
+      {@const tooltipLeft = hoverInfo.svgX > PADDING.left + PLOT_W / 2}
+      {@const tx = tooltipLeft ? hoverInfo.svgX - 8 : hoverInfo.svgX + 8}
+      {@const anchor = tooltipLeft ? 'end' : 'start'}
+      {@const ty = Math.max(PADDING.top + 14, Math.min(hoverInfo.svgY - 6, PADDING.top + PLOT_H - 20))}
+      <text
+        x={tx}
+        y={ty}
+        text-anchor={anchor}
+        fill="#fff"
+        font-size="10"
+        font-weight="600"
+      >
+        {formatAxisValue(hoverInfo.age)} yr
+      </text>
+    {/if}
+
+    <!-- Invisible rect to capture pointer events across full plot area -->
+    <rect
+      x={PADDING.left} y={PADDING.top}
+      width={PLOT_W} height={PLOT_H}
+      fill="transparent"
+    />
   </svg>
 </div>
 
